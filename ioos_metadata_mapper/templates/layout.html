@@ -12,18 +12,25 @@
     {% endblock %}
   </head>
   <body>
-    <div class="container">
-      {%- with messages = get_flashed_messages(with_categories=true) %}
-        {%- if messages %}
-          {%- for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              {{ message }}
-            </div>
-          {%- endfor %}
-        {%- endif %}
-      {%- endwith %}
+    <nav class="navbar navbar-default">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">IOOS Metadata Mapper</a>
+      </div>
 
-      {% block page %}{% endblock %}
-    </div>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Logout</a></li>
+      </ul>
+    </nav>
+    {%- with messages = get_flashed_messages(with_categories=true) %}
+      {%- if messages %}
+        {%- for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+          </div>
+        {%- endfor %}
+      {%- endif %}
+    {%- endwith %}
+
+    {% block page %}{% endblock %}
   </body>
 </html>

@@ -24,6 +24,10 @@ if app.config.get('LOG_FILE') == True:
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 
+# Create the database connection
+from flask.ext.mongokit import MongoKit
+db = MongoKit(app)
+
 # Create datetime jinja2 filter
 def datetimeformat(value, format='%a, %b %d %Y at %I:%M%p'):
     if isinstance(value, datetime.datetime):

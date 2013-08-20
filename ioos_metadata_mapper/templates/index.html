@@ -2,10 +2,93 @@
 
 {% block page %}
 
-<span class="pull-right"><a href="{{ url_for('logout') }}">logout</a></span>
-<h1>IOOS Metadata Mapper</h1>
+<div class="">
 
-<div class="well well-small" style="text-align:right;">
+<div class="col-md-9">
+  <table id="mapping-table" class="table table-striped">
+    <thead>
+      <tr>
+        <th>IOOS Concept Name</th>
+        {%- for src in srcs %}
+        <th>{{ src }}</th>
+        {%- endfor %}
+      </tr>
+    </thead>
+
+    <tbody>
+    {%- for mapping in mappings %}
+
+    <tr>
+      <td>{{ mapping.ioos_name }}</td>
+
+      {%- for q in mapping.queries %}
+      <td><textarea>{{ q }}</textarea></td>
+      {%- endfor %}
+    </tr>
+
+    {%- endfor %}
+
+      <tr>
+        <td><input name="new-row" style="width: 100%; border: 1px solid #ccc" placeholder="New Mapping" /></td>
+
+        {%- for src in srcs %}
+        <td><textarea placeholder="{{ src }}"></textarea></td>
+        {%- endfor %}
+      </tr>
+
+    </tbody>
+  </table>
+
+  <div>
+    <a href="#" class="btn btn-default btn-large"><span class="glyphicon glyphicon-plus"></span> Add Mapping</a>
+  </div>
+</div>
+
+<div class="col-md-3">
+  <div class="panel panel-default panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Evaluation</h3>
+    </div>
+    <div class="panel-body">
+      <!--
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Endpoint/File</th>
+            <th>Evaluated Mapping</th>
+          </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+          <td>FVCOM</td>
+          <td>NetCDF CF NCML</td>
+          <td>http://some.long.com/url/netcfg/</td>
+          <td>Chen</td>
+        </tr>
+
+      </table>
+      -->
+      <ul class="list-group">
+        <li class="list-group-item">
+        <h4 class="list-group-item-heading">
+          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
+          FVCOM <small>NetCDF CF NCML</small>
+        </h4>
+          <textarea class="list-group-item-text" style="width: 100%">Chen</textarea>
+        </li>
+        <li class="list-group-item">
+          <h4 class="list-group-item-heading">GLOS SST</h4>
+          <textarea class="list-group-item-text" style="width: 100%">NPOSE</textarea>
+        </li>
+      </ul>
+      <a class="btn btn-default btn-large"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</a>
+    </div>
+  </div>
+</div>
+
 </div>
 
 {% endblock %}

@@ -2,4 +2,4 @@ Flask==0.9
 Flask-Login==0.2.6
 gunicorn==0.16.1
 Flask-WTF==0.8.2
-
+Flask-MongoKit==0.6
