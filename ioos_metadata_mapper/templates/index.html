@@ -57,6 +57,9 @@
 </div>
 
 <div class="col-md-3">
+  <div class="fail-alert alert alert-danger">
+
+  </div>
   <div class="panel panel-default panel-info">
     <div class="panel-heading">
       <h3 class="panel-title">Evaluation</h3>
@@ -137,12 +140,16 @@ function save(row) {
 
   wat.done(function(dat) {
     //console.log(dat);
-    console.log("done");
     if (row.data('id') != dat) {
       row.data('id', dat);
     }
 
     $('.saved-indicator', row).fadeIn(250).delay(2000).fadeOut(250);
+  });
+
+  wat.fail(function(xhr, textStatus, error) {
+    row.addClass('error');
+    $('.fail-alert').fadeIn(250).text("Could not save: " + textStatus);
   });
 }
 
