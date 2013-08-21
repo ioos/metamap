@@ -8,6 +8,8 @@ from flask.ext.wtf import Form
 from wtforms import TextField, PasswordField
 from itertools import chain
 import sys
+import json
+from bson import ObjectId
 
 class LoginForm(Form):
     username = TextField(u'Name')
@@ -17,7 +19,7 @@ class LoginForm(Form):
 #@login_required
 def index():
     # get all mappings
-    mappings = list(db.Mapping.find())
+    mappings = list(db.Mapping.find().sort([('ioos_name',1)]))
 
     # extract all set source types, set indicies to help the view out
     srcs = ['iso19115', 'ncml', 'swe_xml']
@@ -76,4 +78,21 @@ def crossdomain():
     response = make_response(domain)
     response.headers["Content-type"] = "text/xml"
     return response
+
+@app.route('/mapping', methods=['POST'])
+def update_mapping():
+    mapping = json.loads(request.form['data'])
+
+    if '_id' in mapping and mapping['_id']:
+        db_mapping = db.Mapping.find_one({'_id':ObjectId(mapping['_id'])})
+        assert db_mapping
+    else:
+        db_mapping = db.Mapping()
+
+    db_mapping.ioos_name = mapping['ioos_name']
+    db_mapping.queries = mapping['queries']
+
+    db_mapping.save()
+
+    return str(db_mapping._id)
 

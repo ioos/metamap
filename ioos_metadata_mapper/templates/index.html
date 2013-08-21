@@ -5,7 +5,7 @@
 <div class="">
 
 <div class="col-md-9">
-  <table id="mapping-table" class="table table-striped">
+  <table id="mapping-table" class="table table-striped table-condensed table-hover">
     <thead>
       <tr>
         <th>IOOS Concept Name</th>
@@ -18,29 +18,41 @@
     <tbody>
     {%- for mapping in mappings %}
 
-    <tr>
-      <td>{{ mapping.ioos_name }}</td>
+    <tr data-id="{{mapping._id}}">
+      <td>
+        <input value="{{ mapping.ioos_name }}" class="" />
 
-      {%- for q in mapping.queries %}
-      <td><textarea>{{ q }}</textarea></td>
+        <span class="label label-success saved-indicator pull-left">Saved</span>
+
+        <div class="btn-group pull-right" style="margin-top: 5px;">
+          <button class="btn btn-default btn-xs">Evaluate</button>
+          <button class="btn btn-danger btn-xs">Delete</button>
+        </div>
+      </td>
+
+      {%- for x in range(srcs|count) %}
+      <td><textarea name="{{ srcs[x] }}">{{ mapping.queries[x] }}</textarea></td>
       {%- endfor %}
     </tr>
 
     {%- endfor %}
 
-      <tr>
-        <td><input name="new-row" style="width: 100%; border: 1px solid #ccc" placeholder="New Mapping" /></td>
+      <tr class="new-row">
+        <td>
+          <input name="ioos-name" placeholder="New Mapping" class="" />
+        </td>
 
         {%- for src in srcs %}
-        <td><textarea placeholder="{{ src }}"></textarea></td>
+        <td><textarea name="{{ src }}" placeholder="{{ src }}"></textarea></td>
         {%- endfor %}
+
       </tr>
 
     </tbody>
   </table>
 
   <div>
-    <a href="#" class="btn btn-default btn-large"><span class="glyphicon glyphicon-plus"></span> Add Mapping</a>
+    <button class="btn btn-success btn-large" disabled="disabled"><span class="glyphicon glyphicon-plus"></span> Add Mapping</button>
   </div>
 </div>
 
@@ -90,6 +102,95 @@
 </div>
 
 </div>
+
+<script type="text/javascript">
+
+function evalIoos(row) {
+  var row = $(row);
+  console.log("eval me " + row.data('id'));
+}
+
+function save(row) {
+  var row = $(row);
+
+  // build object to send
+  var mapping = {
+    ioos_name: $('input', row).val(),
+    queries: [],
+    _id: row.data('id'),
+  };
+
+  $('textarea', row).each(function(idx, el) {
+    if ($(el).val()) {
+      mapping.queries.push({source_type: $(el).attr('name'),
+                            query: $(el).val()});
+    }
+  });
+
+  //console.log(mapping);
+
+  var wat = $.ajax({
+    type: 'POST',
+    url: '{{ url_for("update_mapping") }}',
+    data: {'data':JSON.stringify(mapping, null, '\t')},
+  })
+
+  wat.done(function(dat) {
+    //console.log(dat);
+    console.log("done");
+    if (row.data('id') != dat) {
+      row.data('id', dat);
+    }
+
+    $('.saved-indicator', row).fadeIn(250).delay(2000).fadeOut(250);
+  });
+}
+
+function rowModified() {
+  var parentTr = $(this).parents('tr');
+  if (parentTr.data('tid')) {
+    window.clearTimeout(parentTr.data('tid'))
+  }
+  var tid = setTimeout($.proxy(function() {
+    // call eval and save
+    evalIoos(this);
+    save(this);
+
+    // delete timeout id from data
+    $(this).data('tid', null);
+
+  }, parentTr), 2500);
+
+  // store this tid in the parent tr's data
+  parentTr.data("tid", tid);
+}
+
+function newRow() {
+  var newTr = $(this).parents('tr');
+  
+  var cloned = newTr.clone(true).appendTo('#mapping-table tbody');
+  // clear out input/textarea - jquery says clone won't copy it, but it does.
+  $('input', cloned).val('');
+  $('textarea', cloned).val('');
+
+  // remove new-row class and events which trigger a new row creation
+  newTr.removeClass('new-row');
+  $('input', newTr).off('change');
+  $('textarea', newTr).off('change');
+
+  // rig up to autosave
+  newTr.on('input', 'input', rowModified);
+  newTr.on('input', 'textarea', rowModified);
+}
+
+$(function() {
+  $("#mapping-table tbody tr").not('.new-row').on("input", "input", rowModified);
+  $("#mapping-table tbody tr").not('.new-row').on("input", "textarea", rowModified);
+
+  $('#mapping-table .new-row input, #mapping-table .new-row textarea').on("change", newRow);
+
+});
+</script>
 
 {% endblock %}
 

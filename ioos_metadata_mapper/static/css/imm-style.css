@@ -1,5 +1,5 @@
 #mapping-table {
-  table-layout: fixed;
+  /*table-layout: fixed;*/
 }
 
 #mapping-table td {
@@ -8,7 +8,36 @@
 
 #mapping-table textarea {
   width: 100%;
-  height: 100px;
+  height: 5em;
 
-  border: 1px solid #eee;
+  border: 1px solid transparent;
 }
+
+#mapping-table tr:hover textarea {
+  border: 1px solid #ccc;
+}
+
+#mapping-table tr .btn-group {
+  display: none;
+}
+
+#mapping-table tr:hover .btn-group {
+  display: block;
+}
+
+#mapping-table tr input {
+  display: block;
+  width: 100%;
+  border: 1px solid transparent;
+  padding: 5px;
+}
+
+#mapping-table tr:hover input {
+  border: 1px solid #ccc;
+}
+
+#mapping-table .saved-indicator {
+  display: none;
+  margin: 5px;
+}
+
