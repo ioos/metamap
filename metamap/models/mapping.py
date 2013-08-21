@@ -1,5 +1,5 @@
 from datetime import datetime
-from ioos_metadata_mapper import db
+from metamap import db
 from flask.ext.mongokit import Document
 
 @db.register

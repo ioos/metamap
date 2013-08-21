@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from flask import render_template, make_response, redirect, jsonify, flash, url_for, request
-from ioos_metadata_mapper import app, db, login_manager
-from ioos_metadata_mapper.models.user import User
+from metamap import app, db, login_manager
+from metamap.models.user import User
 from flask_login import login_required, login_user, logout_user, current_user
 from flask.ext.wtf import Form
 from wtforms import TextField, PasswordField

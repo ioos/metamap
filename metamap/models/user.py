@@ -3,7 +3,7 @@ import os.path
 import glob
 import sys
 from datetime import datetime
-from ioos_metadata_mapper import app
+from metamap import app
 from flask_login import UserMixin
 
 class User(UserMixin):

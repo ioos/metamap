@@ -1,4 +1,4 @@
-from ioos_metadata_mapper import app
+from metamap import app
 import os
 
 if os.environ.get('APPLICATION_SETTINGS') == 'development.py':

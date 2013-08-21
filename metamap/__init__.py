@@ -7,7 +7,7 @@ from flask_login import LoginManager
 # Create application object
 app = Flask(__name__)
 
-app.config.from_object('ioos_metadata_mapper.defaults')
+app.config.from_object('metamap.defaults')
 app.config.from_envvar('APPLICATION_SETTINGS', silent=True)
 
 import sys
@@ -20,7 +20,7 @@ login_manager.login_view = "login"
 if app.config.get('LOG_FILE') == True:
     import logging
     from logging import FileHandler
-    file_handler = FileHandler('logs/ioos_metadata_mapper.txt')
+    file_handler = FileHandler('logs/metamap.txt')
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 
@@ -52,6 +52,6 @@ def padfit(value, size):
 app.jinja_env.filters['padfit'] = padfit
 
 # Import everything
-import ioos_metadata_mapper.views
-import ioos_metadata_mapper.models
+import metamap.views
+import metamap.models
 
