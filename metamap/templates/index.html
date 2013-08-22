@@ -28,8 +28,8 @@
         <span class="label label-success saved-indicator pull-left">Saved</span>
 
         <div class="btn-group pull-right" style="margin-top: 5px;">
-          <button class="btn btn-default btn-xs">Evaluate</button>
-          <button class="btn btn-danger btn-xs">Delete</button>
+          <button class="btn btn-default btn-xs eval-btn">Evaluate</button>
+          <button class="btn btn-danger btn-xs delete-btn">Delete</button>
         </div>
       </td>
 
@@ -259,6 +259,23 @@ $(function() {
   });
   ta.on('blur', function() {
     $(this).attr('placeholder', '');
+  });
+
+  $('#mapping-table .delete-btn').on('click', function() {
+    var tr = $(this).parents('tr');
+    if (!tr.data('id')) { return; }
+
+    var ioosName = $('input', tr).val();
+
+    if (confirm("Are you sure you want to delete the mapping for " + ioosName + "?")) {
+      $.post('/delete_mapping', {id:tr.data('id')})
+          .done(function() {
+            tr.remove();
+          })
+          .fail(function(xhr, textStatus, error) {
+            $('.fail-alert').fadeIn(250).text("Could not delete: " + textStatus);
+          });
+    }
   });
 });
 </script>

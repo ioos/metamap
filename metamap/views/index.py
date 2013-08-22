@@ -96,3 +96,9 @@ def update_mapping():
 
     return str(db_mapping._id)
 
+@app.route('/delete_mapping', methods=['POST'])
+def delete_mapping():
+    mapping = db.Mapping.find_one({'_id':ObjectId(request.form['id'])})
+    mapping.delete()
+    return ""
+
