@@ -19,30 +19,36 @@
   </thead>
 
   <tbody>
-  {%- for mapping in mappings %}
+    {%- for mapping in mappings %}
 
-  <tr data-id="{{mapping._id}}">
-    <td>
-      <input value="{{ mapping.ioos_name }}" class="" />
+    <tr data-id="{{mapping._id}}">
+      <td>
+        <input value="{{ mapping.ioos_name }}" class="" />
 
-      <span class="label label-success saved-indicator pull-left">Saved</span>
+        <span class="label label-success saved-indicator pull-left">Saved</span>
 
-      <div class="btn-group pull-right" style="margin-top: 5px;">
-        <button class="btn btn-default btn-xs">Evaluate</button>
-        <button class="btn btn-danger btn-xs">Delete</button>
-      </div>
-    </td>
+        <div class="btn-group pull-right" style="margin-top: 5px;">
+          <button class="btn btn-default btn-xs">Evaluate</button>
+          <button class="btn btn-danger btn-xs">Delete</button>
+        </div>
+      </td>
 
-    {%- for x in range(srcs|count) %}
-    <td><textarea name="{{ srcs[x] }}">{{ mapping.queries[x] }}</textarea></td>
+      {%- for x in range(srcs|count) %}
+      <td><textarea name="{{ srcs[x] }}">{{ mapping.queries[x] }}</textarea></td>
+      {%- endfor %}
+    </tr>
+
     {%- endfor %}
-  </tr>
-
-  {%- endfor %}
 
     <tr class="new-row">
       <td>
         <input name="ioos-name" placeholder="New Mapping" class="" />
+        <span class="label label-success saved-indicator pull-left">Saved</span>
+
+        <div class="btn-group pull-right" style="margin-top: 5px;">
+          <button class="btn btn-default btn-xs">Evaluate</button>
+          <button class="btn btn-danger btn-xs">Delete</button>
+        </div>
       </td>
 
       {%- for src in srcs %}
@@ -240,7 +246,7 @@ $(function() {
     event.preventDefault();
   });
 
-  $('#mapping-table textarea').on("focus", function() {
+  var ta = $('#mapping-table textarea').on("focus", function() {
     var td = $(this).parents('td');
     if (!td.hasClass('bigger')) {
       toggleColumn(td);
@@ -250,6 +256,9 @@ $(function() {
         toggleColumn(td);
       });
     }
+  });
+  ta.on('blur', function() {
+    $(this).attr('placeholder', '');
   });
 });
 </script>

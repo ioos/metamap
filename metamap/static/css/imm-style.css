@@ -34,7 +34,7 @@
   display: none;
 }
 
-#mapping-table tr:hover .btn-group {
+#mapping-table tr:not(.new-row):hover .btn-group {
   display: block;
 }
 
