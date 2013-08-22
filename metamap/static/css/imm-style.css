@@ -1,9 +1,22 @@
 #mapping-table {
-  /*table-layout: fixed;*/
+  table-layout: fixed;
+  margin-bottom: 140px;
+  width: inherit;
 }
 
-#mapping-table td {
-  word-wrap: break-word;
+#mapping-table td, #mapping-table th {
+  width: 100px;
+  overflow: hidden;
+  transition: width 250ms;
+}
+
+#mapping-table tr td:first-child, #mapping-table tr th:first-child {
+  width: 300px;
+}
+
+#mapping-table td.bigger, #mapping-table th.bigger {
+  width: 450px;
+  transition: width 250ms;
 }
 
 #mapping-table textarea {
@@ -43,4 +56,32 @@
 
 .fail-alert {
   display: none;
+}
+
+#eval {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  height: 140px;
+
+  background-color: white;
+}
+
+#eval .panel-heading {
+  background-color: #d9edf7;
+}
+
+#eval .panel-body {
+  overflow: auto;
+  white-space: nowrap;
+  padding: 2px;
+}
+
+#eval .list-group {
+  margin-bottom: 0px;
+}
+
+#eval .list-group .list-group-item {
+  display: inline-block;
+  width: 250px;
 }
