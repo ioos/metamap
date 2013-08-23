@@ -21,22 +21,16 @@ def index():
     # get all mappings
     mappings = list(db.Mapping.find().sort([('ioos_name',1)]))
 
-    # extract all set source types, set indicies to help the view out
-    srcs = ['iso19115', 'ncml', 'swe_xml']
+    # set indicies to help the view out
+    srcs = list(db.SourceType.find().sort([('name', 1)]))
+    srcs_idx = [s._id for s in srcs]
 
-    for query in chain(*(x.queries for x in mappings)):
-        #print >>sys.stderr, query
-        if query['source_type'] in srcs:
-            query['idx'] = srcs.index(query['source_type'])
-        else:
-            query['idx'] = len(srcs)
-            srcs.append(query['source_type'])
-
-    # now that we have a populated srcs list, transform list of dicts to lists in correct order for table view
+    # transform lists in correct order for table view
     for m in mappings:
         ql = [''] * len(srcs)
         for q in m.queries:
-            ql[q['idx']] = q['query']
+            idx = srcs_idx.index(q['source_type'])
+            ql[idx] = q['query']
 
         m.queries = ql
 
@@ -90,7 +84,8 @@ def update_mapping():
         db_mapping = db.Mapping()
 
     db_mapping.ioos_name = mapping['ioos_name']
-    db_mapping.queries = mapping['queries']
+    db_mapping.queries = [{'source_type':ObjectId(x['source_type']),
+                           'query': x['query']} for x in mapping['queries']]
 
     db_mapping.save()
 

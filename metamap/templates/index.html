@@ -12,7 +12,7 @@
       {%- for src in srcs %}
       <th>
         <a href="#" class="pull-right"><span class="glyphicon glyphicon-resize-horizontal"></span></a>
-        {{ src }}
+        {{ src.name }}
       </th>
       {%- endfor %}
     </tr>
@@ -34,7 +34,7 @@
       </td>
 
       {%- for x in range(srcs|count) %}
-      <td><textarea name="{{ srcs[x] }}">{{ mapping.queries[x] }}</textarea></td>
+      <td><textarea name="{{ srcs[x]._id }}">{{ mapping.queries[x] }}</textarea></td>
       {%- endfor %}
     </tr>
 
@@ -52,7 +52,7 @@
       </td>
 
       {%- for src in srcs %}
-      <td><textarea name="{{ src }}" placeholder="{{ src }}"></textarea></td>
+      <td><textarea name="{{ src._id }}" placeholder="{{ src.name }}"></textarea></td>
       {%- endfor %}
 
     </tr>

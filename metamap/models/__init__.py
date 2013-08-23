@@ -1,2 +1,2 @@
-from metamap.models import user, mapping
+from metamap.models import user, mapping, source_type
 
