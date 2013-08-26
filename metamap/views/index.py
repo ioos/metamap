@@ -5,15 +5,22 @@ from metamap import app, db, login_manager
 from metamap.models.user import User
 from flask_login import login_required, login_user, logout_user, current_user
 from flask.ext.wtf import Form
-from wtforms import TextField, PasswordField
+from wtforms import TextField, PasswordField, SelectField, FileField
 from itertools import chain
 import sys
 import json
 from bson import ObjectId
+from StringIO import StringIO
 
 class LoginForm(Form):
     username = TextField(u'Name')
     password = PasswordField(u'Password')
+
+class AddEvalSourceForm(Form):
+    name        = TextField(u'Name')
+    source_type = SelectField(u'Source Type')
+    url         = TextField(u'URL')
+    upload      = FileField(u'File')
 
 @app.route('/', methods=['GET'])
 #@login_required
@@ -24,6 +31,7 @@ def index():
     # set indicies to help the view out
     srcs = list(db.SourceType.find().sort([('name', 1)]))
     srcs_idx = [s._id for s in srcs]
+    src_map = {s._id:s for s in srcs}
 
     # transform lists in correct order for table view
     for m in mappings:
@@ -34,7 +42,21 @@ def index():
 
         m.queries = ql
 
-    return render_template('index.html', mappings=mappings, srcs=srcs)
+    f = AddEvalSourceForm()
+    f.source_type.choices = [(s._id, s.name) for s in srcs]
+
+    # get eval sources
+    def fix_source_type(eval_source):
+        eval_source.source_type = src_map[eval_source.source_type].name
+        return eval_source
+
+    eval_sources = map(fix_source_type, db.EvalSource.find())
+
+    return render_template('index.html',
+                           mappings=mappings,
+                           srcs=srcs,
+                           form=f,
+                           eval_sources=eval_sources)
 
 @login_manager.user_loader
 def load_user(userid):
@@ -96,4 +118,41 @@ def delete_mapping():
     mapping = db.Mapping.find_one({'_id':ObjectId(request.form['id'])})
     mapping.delete()
     return ""
+
+@app.route('/eval_source', methods=['POST'])
+def add_eval_source():
+    print >>sys.stderr, request.form
+    print >>sys.stderr, request.files
+
+    eval_source = db.EvalSource()
+    eval_source.name = request.form['name']
+    eval_source.source_type = ObjectId(request.form['source_type'])
+    eval_source.save()
+
+    # switch on presence of file
+    if 'upload' in request.files:
+        file_obj = request.files['upload']
+        eval_source.endpoint = file_obj.filename
+
+        s = StringIO()
+        for x in file_obj.read():
+            s.write(x)
+
+        #print >>sys.stderr, str(s.getvalue())
+        eval_source.fs.src_file = str(s.getvalue())
+        s.close()
+
+    else:
+        # @TODO: request.get the url, store it the same way
+        eval_source.endpoint = request.form['url']
+        pass
+
+    eval_source.save()
+
+    response = make_response(json.dumps({'name':eval_source.name,
+                                          'source_type':db.SourceType.find_one({'_id':eval_source.source_type}).name,
+                                          '_id': str(eval_source._id)}))
+
+    response.headers['Content-type'] = 'application/json'
+    return response
 

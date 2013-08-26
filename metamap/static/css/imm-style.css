@@ -85,3 +85,11 @@
   display: inline-block;
   width: 250px;
 }
+
+#eval .list-group .list-group-item h4 a {
+  display: none;
+}
+
+#eval .list-group .list-group-item:hover h4 a {
+  display: block;
+}

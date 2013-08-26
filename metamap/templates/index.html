@@ -69,76 +69,52 @@
 <div id="eval">
   <div class="panel-heading">
     <!--<a href="#" class="pull-right"><span class="glyphicon glyphicon-collapse-down"></span></a>-->
-    <a href="#" class="btn btn-xs btn-info pull-right"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</a>
+    <button class="btn btn-xs btn-info pull-right" data-toggle="modal" data-target="#add_eval_modal"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</button>
     <h3 class="panel-title">Evaluation</h3>
   </div>
   <div class="panel-body">
     <ul class="list-group">
+      {%- for eval_source in eval_sources %}
       <li class="list-group-item">
         <h4 class="list-group-item-heading">
           <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
+          <span>{{ eval_source.name }}</span> <small>{{ eval_source.source_type }}</small>
         </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
+        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="" />
       </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">
-          <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
-          FVCOM <small>NetCDF CF NCML</small>
-        </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="Chen" />
-      </li>
-      <li class="list-group-item">
-        <h4 class="list-group-item-heading">GLOS SST</h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="NPOSE" />
-      </li>
+      {%- endfor %}
     </ul>
     <!--<a class="btn btn-default btn-large"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</a>-->
   </div>
 </div>
 
+<div id="add_eval_modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Add Evaluation Source</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+        {%- for f in form %}
+        <div class="form-group">
+          {% if f.name != "csrf_token" %}
+          <label for="{{ f.name }}" class="col-lg-4 control-label">{{ f.label }}</label>
+          <div class="col-lg-8">
+            {{ f(class_="form-control") }}
+          </div>
+          {% endif %}
+        </div>
+        {%- endfor %}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" id="add-source" class="btn btn-primary">Add Source</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
 
@@ -235,6 +211,10 @@ function toggleColumn(colItem) {
   //$('td, th', colItem.parents('table')).not(col).not($('td:first-child, colItem:first-child', colItem.parents('table'))).toggleClass('bigger');
 }
 
+function progressHandler() {
+  console.log("i got them handler");
+}
+
 $(function() {
   $("#mapping-table tbody tr").not('.new-row').on("input", "input", rowModified);
   $("#mapping-table tbody tr").not('.new-row').on("input", "textarea", rowModified);
@@ -276,6 +256,44 @@ $(function() {
             $('.fail-alert').fadeIn(250).text("Could not delete: " + textStatus);
           });
     }
+  });
+
+  $('#add_eval_modal #add-source').on('click', function() {
+    var formData = new FormData($('#add_eval_modal form')[0]);
+    var req = $.ajax({
+      url: '{{ url_for("add_eval_source") }}',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false
+    }, 'json');
+
+    req.progress(function() {
+      console.log("progress?");
+    });
+
+    req.done(function(data) {
+      $('#add_eval_modal').modal('hide');
+
+      var firstItem = $('#eval .list-group-item:first') 
+      var newList = null;
+      if (!firstItem.length) {
+        newList = $('<li class="list-group-item"><h4 class="list-group-item-heading"><a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a><span>title </span><small>source_type</small></h4><input type="text" class="list-group-item-text form-control" disabled="disabled" value="" /></li>');
+      } else {
+        newList = firstItem.clone();
+      }
+      var heading = $('.list-group-item-heading', newList);
+      
+      $('>span', heading).text(data.name + ' ');
+      $('small', heading).text(data.source_type);
+
+      newList.data('id', data._id);
+
+      newList.appendTo($('#eval ul'));
+    })
+    req.fail(function() {
+      console.error('failboat');
+    })
   });
 });
 </script>
