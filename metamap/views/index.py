@@ -13,6 +13,7 @@ from bson import ObjectId
 from StringIO import StringIO
 from lxml import etree
 from wicken.xml_dogma import XmlDogma
+import requests
 
 class LoginForm(Form):
     username = TextField(u'Name')
@@ -147,7 +148,7 @@ def add_eval_source():
     eval_source.save()
 
     # switch on presence of file
-    if 'upload' in request.files:
+    if 'upload' in request.files and request.files['upload'].filename != '':
         file_obj = request.files['upload']
         eval_source.endpoint = file_obj.filename
 
@@ -160,9 +161,11 @@ def add_eval_source():
         s.close()
 
     else:
-        # @TODO: request.get the url, store it the same way
+        r = requests.get(request.form['url'])
+        r.raise_for_status()
+
+        eval_source.fs.src_file = str(r.content)
         eval_source.endpoint = request.form['url']
-        pass
 
     eval_source.save()
 
@@ -194,7 +197,10 @@ def eval_mapping(mapping_id):
 
         # load attachment from gridfs
         for eval_source in eval_sources:
-            root = etree.fromstring(eval_source.fs.src_file)
+            try:
+                root = etree.fromstring(eval_source.fs.src_file)
+            except:
+                print >>sys.stderr, "Could not parse:", eval_source.fs.src_file
 
             data_object = XmlDogma(type_map[source_type_id],
                                    cur_mappings,
