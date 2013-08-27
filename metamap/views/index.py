@@ -68,7 +68,9 @@ def index():
         eval_source.source_type = src_map[eval_source.source_type].name
         return eval_source
 
+    # add a blank eval source at the front, used as a hidden HTML template
     eval_sources = map(fix_source_type, db.EvalSource.find())
+    eval_sources.insert(0, db.EvalSource())
 
     return render_template('index.html',
                            mappings=mappings,

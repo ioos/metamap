@@ -326,13 +326,7 @@ $(function() {
     req.done(function(data) {
       $('#add_eval_modal').modal('hide');
 
-      var firstItem = $('#eval .list-group-item:first') 
-      var newList = null;
-      if (!firstItem.length) {
-        newList = $('<li class="list-group-item"><h4 class="list-group-item-heading"><a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a><span>title </span><small>source_type</small></h4><input type="text" class="list-group-item-text form-control" disabled="disabled" value="" /></li>');
-      } else {
-        newList = firstItem.clone();
-      }
+      var newList = $('#eval .list-group-item:first').clone();
       var heading = $('.list-group-item-heading', newList);
       
       $('>span', heading).text(data.name + ' ');

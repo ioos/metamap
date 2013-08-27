@@ -93,3 +93,8 @@
 #eval .list-group .list-group-item:hover h4 a {
   display: block;
 }
+
+/* hide the first one, it's just a template */
+#eval .list-group .list-group-item:first-child {
+  display: none;
+}
