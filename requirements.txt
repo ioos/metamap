@@ -5,4 +5,5 @@ Flask-WTF==0.8.2
 Flask-MongoKit==0.6
 requests==1.2.3
 -e git+git://github.com/asascience-open/wicken.git#egg=Wicken
+netCDF4==1.0.5
 

@@ -14,6 +14,9 @@ from StringIO import StringIO
 from lxml import etree
 from wicken.xml_dogma import XmlDogma
 import requests
+from netCDF4 import Dataset
+from petulantbear.netcdf2ncml import dataset2ncml
+import tempfile
 
 class LoginForm(Form):
     username = TextField(u'Name')
@@ -38,6 +41,7 @@ namespaces = {
     "gmd":"http://www.isotc211.org/2005/gmd",
     "gmi":"http://www.isotc211.org/2005/gmi",
     "srv":"http://www.isotc211.org/2005/srv",
+    "ncml":"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2",
 }
 
 @app.route('/', methods=['GET'])
@@ -141,9 +145,6 @@ def delete_mapping():
 
 @app.route('/eval_source', methods=['POST'])
 def add_eval_source():
-    print >>sys.stderr, request.form
-    print >>sys.stderr, request.files
-
     eval_source = db.EvalSource()
     eval_source.name = request.form['name']
     eval_source.source_type = ObjectId(request.form['source_type'])
@@ -154,20 +155,53 @@ def add_eval_source():
         file_obj = request.files['upload']
         eval_source.endpoint = file_obj.filename
 
+        # unfortunately we can't seem to switch on mimetype as both ncml and nc files
+        # come through as "application/octet-stream" so we'll just cheaply switch on file ending
         s = StringIO()
-        for x in file_obj.read():
-            s.write(x)
 
-        #print >>sys.stderr, str(s.getvalue())
+        if file_obj.filename.endswith(".nc"):
+            with tempfile.NamedTemporaryFile() as f:
+                file_obj.save(f)
+
+                # use pb to rip an ncml file, save that
+                d = Dataset(f.name)
+                s.write(dataset2ncml(d))
+                d.close()
+
+            # endpoint name should end with .ncml now
+            eval_source.endpoint += "ml"
+
+            # ensure user picked source type correctly
+            eval_source.source_type = db.SourceType.find_one({'name':'NetCDF CF NCML'})._id
+
+        else:
+            for x in file_obj.read():
+                s.write(x)
+
         eval_source.fs.src_file = str(s.getvalue())
         s.close()
 
     else:
-        r = requests.get(request.form['url'])
-        r.raise_for_status()
+        url = request.form['url']
+        r = requests.head(url)
+        content = None
+        if 'content-description' in r.headers and r.headers['content-description'].startswith('dods-'):
+            if url.endswith(".html"):
+                url = url[0:-5]
 
-        eval_source.fs.src_file = str(r.content)
-        eval_source.endpoint = request.form['url']
+            d = Dataset(url)
+            content = dataset2ncml(d)
+            d.close()
+
+            # ensure user picked source type correctly
+            eval_source.source_type = db.SourceType.find_one({'name':'NetCDF CF NCML'})._id
+        else:
+            r = requests.get(url)
+            r.raise_for_status()
+            content = str(r.content)
+
+        eval_source.fs.src_file = content
+        eval_source.endpoint = url
 
     eval_source.save()
 
@@ -181,13 +215,6 @@ def add_eval_source():
 @app.route("/eval/<ObjectId:mapping_id>", methods=['GET'])
 def eval_mapping(mapping_id):
     mapping = db.Mapping.find_one({'_id':mapping_id})
-
-    # @TODO go into schema
-    type_translate = {'ISO 19115'      : 'Iso19115',
-                      'SWE XML'        : None,
-                      'NetCDF CF NCML' : 'NetcdfCF'}
-
-    type_map = {x._id:type_translate[x.name] for x in db.SourceType.find()}
 
     evals = []
     for query in mapping.queries:
@@ -204,7 +231,7 @@ def eval_mapping(mapping_id):
             except:
                 print >>sys.stderr, "Could not parse:", eval_source.fs.src_file
 
-            data_object = XmlDogma(type_map[source_type_id],
+            data_object = XmlDogma(str(source_type_id),    # any identifier here
                                    cur_mappings,
                                    root,
                                    namespaces=namespaces)

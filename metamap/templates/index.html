@@ -143,7 +143,11 @@ function evalIoos(row) {
       $('#eval h3.panel-title span').text($('input:first', row).val());
 
       for (var k in data) {
-        var inp = $('#eval li[data-id="' + k + '"] input');
+
+        // since .data() stores in memory not in html data attributes, can't select on them, have to filter
+        var inp = $('input', $('#eval li').filter(function() {
+          return $(this).data('id') == k;                                        
+        }));
 
         if (data[k] == null) {
           inp.parent().addClass('has-error');
