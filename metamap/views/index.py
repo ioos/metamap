@@ -11,6 +11,8 @@ import sys
 import json
 from bson import ObjectId
 from StringIO import StringIO
+from lxml import etree
+from wicken.xml_dogma import XmlDogma
 
 class LoginForm(Form):
     username = TextField(u'Name')
@@ -21,6 +23,21 @@ class AddEvalSourceForm(Form):
     source_type = SelectField(u'Source Type')
     url         = TextField(u'URL')
     upload      = FileField(u'File')
+
+namespaces = {
+    "gmx":"http://www.isotc211.org/2005/gmx",
+    "gsr":"http://www.isotc211.org/2005/gsr",
+    "gss":"http://www.isotc211.org/2005/gss",
+    "gts":"http://www.isotc211.org/2005/gts",
+    "xs":"http://www.w3.org/2001/XMLSchema",
+    "gml":"http://www.opengis.net/gml/3.2",
+    "xlink":"http://www.w3.org/1999/xlink",
+    "xsi":"http://www.w3.org/2001/XMLSchema-instance",
+    "gco":"http://www.isotc211.org/2005/gco",
+    "gmd":"http://www.isotc211.org/2005/gmd",
+    "gmi":"http://www.isotc211.org/2005/gmi",
+    "srv":"http://www.isotc211.org/2005/srv",
+}
 
 @app.route('/', methods=['GET'])
 #@login_required
@@ -155,4 +172,36 @@ def add_eval_source():
 
     response.headers['Content-type'] = 'application/json'
     return response
+
+@app.route("/eval/<ObjectId:mapping_id>", methods=['GET'])
+def eval_mapping(mapping_id):
+    mapping = db.Mapping.find_one({'_id':mapping_id})
+
+    # @TODO go into schema
+    type_translate = {'ISO 19115'      : 'Iso19115',
+                      'SWE XML'        : None,
+                      'NetCDF CF NCML' : 'NetcdfCF'}
+
+    type_map = {x._id:type_translate[x.name] for x in db.SourceType.find()}
+
+    evals = []
+    for query in mapping.queries:
+
+        source_type_id = query['source_type']
+        eval_sources = db.EvalSource.find({'source_type':source_type_id})
+
+        cur_mappings = {'curval': query['query']}
+
+        # load attachment from gridfs
+        for eval_source in eval_sources:
+            root = etree.fromstring(eval_source.fs.src_file)
+
+            data_object = XmlDogma(type_map[source_type_id],
+                                   cur_mappings,
+                                   root,
+                                   namespaces=namespaces)
+
+            evals.append((str(eval_source._id), data_object.curval))
+
+    return json.dumps(dict(evals))
 

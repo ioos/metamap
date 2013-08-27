@@ -70,17 +70,20 @@
   <div class="panel-heading">
     <!--<a href="#" class="pull-right"><span class="glyphicon glyphicon-collapse-down"></span></a>-->
     <button class="btn btn-xs btn-info pull-right" data-toggle="modal" data-target="#add_eval_modal"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</button>
-    <h3 class="panel-title">Evaluation</h3>
+    <h3 class="panel-title">Evaluation: <span></span></h3>
   </div>
   <div class="panel-body">
     <ul class="list-group">
       {%- for eval_source in eval_sources %}
-      <li class="list-group-item">
+      <li class="list-group-item" data-id="{{ eval_source._id }}">
         <h4 class="list-group-item-heading">
           <a href="#" class="pull-right"><span class="glyphicon glyphicon-info-sign"></span></a>
           <span>{{ eval_source.name }}</span> <small>{{ eval_source.source_type }}</small>
         </h4>
-        <input type="text" class="list-group-item-text form-control" disabled="disabled" value="" />
+        <div class="input-group">
+          <span class="input-group-addon"><span class="glyphicon glyphicon-ok"></span></span>
+          <input type="text" class="list-group-item-text form-control" disabled="disabled" value="" />
+        </div>
       </li>
       {%- endfor %}
     </ul>
@@ -121,6 +124,43 @@
 function evalIoos(row) {
   var row = $(row);
   console.log("eval me " + row.data('id'));
+
+  $('#eval .list-group-item .input-group')
+    .removeClass('has-success')
+    .removeClass('has-error');
+
+  $('#eval .list-group-item .input-group .glyphicon')
+    .removeClass('glyphicon-ok')
+    .removeClass('glyphicon-minus-sign')
+    .addClass('glyphicon-repeat');
+
+  $.getJSON('/eval/' + row.data('id'))
+    .done(function(data) {
+      console.log(data);
+
+      $('#eval h3.panel-title span').text($('input:first', row).val());
+
+      for (var k in data) {
+        var inp = $('#eval li[data-id="' + k + '"] input');
+
+        if (data[k] == null) {
+          inp.parent().addClass('has-error');
+          inp.val(null);
+
+          $('.glyphicon', inp.parent())
+            .removeClass('glyphicon-repeat')
+            .addClass('glyphicon-minus-sign');
+
+        } else {
+          inp.val(data[k]);
+          inp.parent().addClass('has-success');
+
+          $('.glyphicon', inp.parent())
+            .removeClass('glyphicon-repeat')
+            .addClass('glyphicon-ok');
+        }
+      }
+    });
 }
 
 function save(row) {
@@ -161,6 +201,8 @@ function save(row) {
     row.addClass('error');
     $('.fail-alert').fadeIn(250).text("Could not save: " + textStatus);
   });
+
+  return wat;
 }
 
 function rowModified() {
@@ -170,8 +212,10 @@ function rowModified() {
   }
   var tid = setTimeout($.proxy(function() {
     // call eval and save
-    evalIoos(this);
-    save(this);
+    save(this)
+      .done($.proxy(function() {
+        evalIoos(this);
+      }, this));
 
     // delete timeout id from data
     $(this).data('tid', null);
@@ -239,6 +283,13 @@ $(function() {
   });
   ta.on('blur', function() {
     $(this).attr('placeholder', '');
+  });
+
+  $('#mapping-table .eval-btn').on('click', function() {
+    var tr = $(this).parents('tr');
+    if (!tr.data('id')) { return; }
+
+    evalIoos(tr);
   });
 
   $('#mapping-table .delete-btn').on('click', function() {
