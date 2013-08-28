@@ -50,7 +50,14 @@ namespaces = {
 def index(map_set_id=None):
 
     if map_set_id is None:
-        map_set_id = db.MapSet.find_one({'name':'Default'})._id
+        ms = db.MapSet.find_one({'name':'Default'})
+        # Create the default MapSet as "Default"
+        if ms is None:
+            ms = db.MapSet()
+            ms.name = u"Default"
+            ms.save()
+        map_set_id = ms._id
+
 
     # list of map sets
     map_sets = list(db.MapSet.find())
@@ -70,6 +77,13 @@ def index(map_set_id=None):
 
     # set indicies to help the view out
     srcs = list(db.SourceType.find().sort([('name', 1)]))
+    if len(srcs) < 1:
+        # Create the default SourceType as NcML
+        st = db.SourceType()
+        st.name = u"NcML"
+        st.save()
+        srcs = [st]
+
     srcs_idx = [s._id for s in srcs]
     src_map = {s._id:s for s in srcs}
 
