@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import render_template, make_response, redirect, jsonify, flash, url_for, request
+from flask import render_template, make_response, redirect, jsonify, flash, url_for, request, session
 from metamap import app, db, login_manager
 from metamap.models.user import User
 from flask_login import login_required, login_user, logout_user, current_user
@@ -45,10 +45,33 @@ namespaces = {
 }
 
 @app.route('/', methods=['GET'])
+@app.route('/<ObjectId:map_set_id>', methods=['GET'])
 #@login_required
-def index():
+def index(map_set_id=None):
+
+    if map_set_id is None:
+        if 'map_set' in session:
+            map_set_id = session['map_set']
+        else:
+            session['map_set'] = db.MapSet.find_one({'name':'Default'})._id
+            map_set_id = session['map_set']
+
+    else:
+        session['map_set'] = db.MapSet.find_one({'_id':map_set_id})._id
+
+    # list of map sets
+    map_sets = list(db.MapSet.find())
+
+    # mappings counted by map sets
+    agg = db[db.Mapping.__collection__].aggregate({'$group':{'_id':'$map_set',
+                                                             'count': { '$sum': 1}}})
+
+    # create default map_set_id -> 0 to catch empty mapsets
+    map_set_counts = {m._id:0 for m in map_sets}
+    map_set_counts.update({a['_id']:a['count'] for a in agg['result']})
+
     # get all mappings
-    mappings = list(db.Mapping.find().sort([('ioos_name',1)]))
+    mappings = list(db.Mapping.find({'map_set': map_set_id}).sort([('ioos_name',1)]))
 
     # set indicies to help the view out
     srcs = list(db.SourceType.find().sort([('name', 1)]))
@@ -77,6 +100,8 @@ def index():
     eval_sources.insert(0, db.EvalSource())
 
     return render_template('index.html',
+                           map_sets=map_sets,
+                           map_set_counts=map_set_counts,
                            mappings=mappings,
                            srcs=srcs,
                            form=f,
@@ -121,6 +146,8 @@ def crossdomain():
 
 @app.route('/mapping', methods=['POST'])
 def update_mapping():
+    assert 'map_set' in session
+
     mapping = json.loads(request.form['data'])
 
     if '_id' in mapping and mapping['_id']:
@@ -130,6 +157,7 @@ def update_mapping():
         db_mapping = db.Mapping()
 
     db_mapping.ioos_name = mapping['ioos_name']
+    db_mapping.map_set = session['map_set']
     db_mapping.queries = [{'source_type':ObjectId(x['source_type']),
                            'query': x['query']} for x in mapping['queries']]
 

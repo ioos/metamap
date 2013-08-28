@@ -13,6 +13,7 @@ class Mapping(Document):
         'ioos_name' : unicode, # ioos concept name
         'queries'   : [{'source_type' :ObjectId,
                         'query'       :unicode}],
+        'map_set'   : ObjectId,
         'created'   : datetime,
         'updated'   : datetime,
     }
