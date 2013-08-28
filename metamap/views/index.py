@@ -143,9 +143,24 @@ def delete_mapping():
     mapping.delete()
     return ""
 
+@app.route('/eval_source/<ObjectId:eval_source_id>', methods=['GET'])
+def get_eval_source(eval_source_id):
+    eval_source = db.EvalSource.find_one({'_id':eval_source_id})
+
+    return json.dumps({'_id': str(eval_source._id),
+                       'name': eval_source.name,
+                       'source_type': str(eval_source.source_type),
+                       'endpoint': eval_source.endpoint})
+
 @app.route('/eval_source', methods=['POST'])
-def add_eval_source():
-    eval_source = db.EvalSource()
+@app.route('/eval_source/<ObjectId:eval_source_id>', methods=['POST'])
+def eval_source(eval_source_id=None):
+    eval_source = None
+    if eval_source_id:
+        eval_source = db.EvalSource.find_one({'_id':eval_source_id})
+    else:
+        eval_source = db.EvalSource()
+
     eval_source.name = request.form['name']
     eval_source.source_type = ObjectId(request.form['source_type'])
     eval_source.save()
@@ -181,7 +196,7 @@ def add_eval_source():
         eval_source.fs.src_file = str(s.getvalue())
         s.close()
 
-    else:
+    elif 'url' in request.form and request.form['url'] != "":
         url = request.form['url']
         r = requests.head(url)
         content = None
@@ -211,6 +226,12 @@ def add_eval_source():
 
     response.headers['Content-type'] = 'application/json'
     return response
+
+@app.route('/delete_source', methods=['POST'])
+def delete_source():
+    eval_source = db.EvalSource.find_one({'_id':ObjectId(request.form['id'])})
+    eval_source.delete()
+    return ""
 
 @app.route("/eval/<ObjectId:mapping_id>", methods=['GET'])
 def eval_mapping(mapping_id):
