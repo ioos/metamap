@@ -67,8 +67,10 @@ def index(map_set_id=None):
                                                              'count': { '$sum': 1}}})
 
     # create default map_set_id -> 0 to catch empty mapsets
-    map_set_counts = {m._id:0 for m in map_sets}
-    map_set_counts.update({a['_id']:a['count'] for a in agg['result']})
+    map_set_lookup = {m._id:{'count':0, 'name':m.name} for m in map_sets}
+    for a in agg['result']:
+        map_set_lookup[a['_id']]['count'] = a['count']
+
 
     # get all mappings
     mappings = list(db.Mapping.find({'map_set': map_set_id}).sort([('ioos_name',1)]))
@@ -101,7 +103,7 @@ def index(map_set_id=None):
 
     return render_template('index.html',
                            map_sets=map_sets,
-                           map_set_counts=map_set_counts,
+                           map_set_lookup=map_set_lookup,
                            mappings=mappings,
                            srcs=srcs,
                            form=f,

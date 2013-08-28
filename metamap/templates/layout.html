@@ -20,12 +20,12 @@
 
       <ul class="nav navbar-nav">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Default <b class="caret"></b></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mapping: {{ map_set_lookup[session['map_set']]['name'] }} <b class="caret"></b></a>
           <ul class="dropdown-menu">
             {%- for map_set in map_sets %}
             <li>
               <a href="{{ url_for('index', map_set_id=map_set._id) }}">
-                <span class="badge pull-right">{{ map_set_counts[map_set._id] }}</span>
+                <span class="badge pull-right">{{ map_set_lookup[map_set._id]['count'] }}</span>
                 {{ map_set.name }}
               </a>
             </li>
