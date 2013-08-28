@@ -203,6 +203,7 @@ function save(row) {
   var mapping = {
     ioos_name: $('input', row).val(),
     queries: [],
+    map_set: "{{ map_set_id }}",
     _id: row.data('id'),
   };
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import render_template, make_response, redirect, jsonify, flash, url_for, request, session
+from flask import render_template, make_response, redirect, jsonify, flash, url_for, request
 from metamap import app, db, login_manager
 from metamap.models.user import User
 from flask_login import login_required, login_user, logout_user, current_user
@@ -50,14 +50,7 @@ namespaces = {
 def index(map_set_id=None):
 
     if map_set_id is None:
-        if 'map_set' in session:
-            map_set_id = session['map_set']
-        else:
-            session['map_set'] = db.MapSet.find_one({'name':'Default'})._id
-            map_set_id = session['map_set']
-
-    else:
-        session['map_set'] = db.MapSet.find_one({'_id':map_set_id})._id
+        map_set_id = db.MapSet.find_one({'name':'Default'})._id
 
     # list of map sets
     map_sets = list(db.MapSet.find())
@@ -102,6 +95,7 @@ def index(map_set_id=None):
     eval_sources.insert(0, db.EvalSource())
 
     return render_template('index.html',
+                           map_set_id=map_set_id,
                            map_sets=map_sets,
                            map_set_lookup=map_set_lookup,
                            mappings=mappings,
@@ -148,8 +142,6 @@ def crossdomain():
 
 @app.route('/mapping', methods=['POST'])
 def update_mapping():
-    assert 'map_set' in session
-
     mapping = json.loads(request.form['data'])
 
     if '_id' in mapping and mapping['_id']:
@@ -159,7 +151,7 @@ def update_mapping():
         db_mapping = db.Mapping()
 
     db_mapping.ioos_name = mapping['ioos_name']
-    db_mapping.map_set = session['map_set']
+    db_mapping.map_set = ObjectId(mapping['map_set'])
     db_mapping.queries = [{'source_type':ObjectId(x['source_type']),
                            'query': x['query']} for x in mapping['queries']]
 

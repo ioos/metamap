@@ -20,7 +20,7 @@
 
       <ul class="nav navbar-nav">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mapping: {{ map_set_lookup[session['map_set']]['name'] }} <b class="caret"></b></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Mapping: {{ map_set_lookup[map_set_id]['name'] }} <b class="caret"></b></a>
           <ul class="dropdown-menu">
             {%- for map_set in map_sets %}
             <li>
@@ -40,7 +40,7 @@
           <ul class="dropdown-menu">
             {%- for src in srcs %}
             <li>
-              <a href="{{ url_for('download_map_set', map_set_id=session['map_set'], source_type_id=src._id)}}">
+              <a href="{{ url_for('download_map_set', map_set_id=map_set_id, source_type_id=src._id)}}">
                 <span class="glyphicon glyphicon-download-alt"></span> {{ src.name }}
               </a>
             </li>
