@@ -32,9 +32,22 @@
             {%- endfor %}
           </ul>
         </li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-download"></span> Download Mapping <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            {%- for src in srcs %}
+            <li>
+              <a href="{{ url_for('download_map_set', map_set_id=session['map_set'], source_type_id=src._id)}}">
+                <span class="glyphicon glyphicon-download-alt"></span> {{ src.name }}
+              </a>
+            </li>
+            {%- endfor %}
+          </ul>
       </ul>
 
-      <button type="button" class="btn btn-primary navbar-btn"><span class="glyphicon glyphicon-download"></span> Download Mapping</button>
       <button type="button" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-upload"></span> Import Mapping</button>
 
       <ul class="nav navbar-nav navbar-right">
