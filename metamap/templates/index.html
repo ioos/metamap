@@ -142,7 +142,6 @@
       </li>
       {%- endfor %}
     </ul>
-    <!--<a class="btn btn-default btn-large"><span class="glyphicon glyphicon-plus"></span> Add Eval Source</a>-->
   </div>
 </div>
 
@@ -150,9 +149,11 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title"><span data-mode="add">Add</span><span data-mode="edit">Edit</span> Evaluation Source</h4>
       </div>
       <div class="modal-body">
+        <div id="eval-error" class="alert alert-danger"></div>
         <form class="form-horizontal">
           <input type="hidden" name="_id" />
           {%- for f in form %}
@@ -190,11 +191,11 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <span data-mode="edit">
-          <button type="button" id="del-source" class="btn btn-danger">Delete</button>
-          <button type="button" id="edit-source" class="btn btn-primary">Edit Source</button>
+          <button type="button" id="del-source" data-loading-text="Deleting..." class="btn btn-danger">Delete</button>
+          <button type="button" id="edit-source" data-loading-text="Saving..." class="btn btn-primary">Edit Source</button>
         </span>
         <span data-mode="add">
-          <button type="button" id="add-source" class="btn btn-primary">Add Source</button>
+          <button type="button" id="add-source" data-loading-text="Saving..." class="btn btn-primary">Add Source</button>
         </span>
       </div>
     </div>
@@ -209,9 +210,7 @@
         <h4 class="modal-title">New MapSet</h4>
       </div>
       <div class="modal-body">
-        <div id="new-mapset-error" class="alert alert-danger">
-
-        </div>
+        <div id="new-mapset-error" class="alert alert-danger"></div>
         <form class="form-horizontal">
           <div class="form-group">
             <label for="name" class="col-lg-4 control-label">Name</label>
@@ -347,7 +346,7 @@ function save(row) {
 
   wat.fail(function(xhr, textStatus, error) {
     row.addClass('error');
-    $('.fail-alert').fadeIn(250).text("Could not save: " + textStatus);
+    $('.fail-alert').fadeIn(250).text("Could not save: " + error);
   });
 
   return wat;
@@ -470,9 +469,13 @@ $(function() {
             tr.remove();
           })
           .fail(function(xhr, textStatus, error) {
-            $('.fail-alert').fadeIn(250).text("Could not delete: " + textStatus);
+            $('.fail-alert').fadeIn(250).text("Could not delete: " + error);
           });
     }
+  });
+
+  $('#eval-modal').on('show.bs.modal', function() {
+    $('#eval-error', $(this)).hide();
   });
 
   $('#add-eval-btn').on('click', function() {
@@ -504,6 +507,11 @@ $(function() {
   $('#eval-modal #del-source').on('click', function() {
     var eid = $('#eval-modal input[name="_id"]').val();
     if (confirm("Are you sure you want to delete this source?")) {
+
+      var btn = $(this);
+      $('button', btn.parent()).attr('disabled', 'disabled');
+      btn.button('loading');
+
       $.post('/delete_source', {id:eid})
         .done(function() {
           $('#eval-modal').modal('hide');
@@ -511,12 +519,23 @@ $(function() {
             return $(this).data('id') == eid;
           }).remove();
         })
+        .fail(function(xhr, textStatus, error) {
+          $('#eval-modal #eval-error').fadeIn(250).text("Could not delete Eval Source: " + error);
+        })
+        .always(function() {
+          $('button', btn.parent()).removeAttr('disabled');
+          btn.button('reset');
+        });
     }
   });
 
   $('#eval-modal #edit-source').on('click', function() {
     var eid = $('#eval-modal input[name="_id"]').val();
     var req = postEvalSource(eid);
+
+    var btn = $(this);
+    $('button', btn.parent()).attr('disabled', 'disabled');
+    btn.button('loading');
 
     req.done(function(data) {
       $('#eval-modal').modal('hide');
@@ -531,6 +550,13 @@ $(function() {
       $('small', heading).text(data.source_type);
 
       exist.data('id', data._id);
+    })
+    .fail(function(xhr, textStatus, error) {
+      $('#eval-modal #eval-error').fadeIn(250).text("Could not edit Eval Source: " + error);
+    })
+    .always(function() {
+      $('button', btn.parent()).removeAttr('disabled');
+      btn.button('reset');
     });
   });
 
@@ -554,8 +580,8 @@ $(function() {
 
       newList.appendTo($('#eval ul'));
     })
-    req.fail(function() {
-      console.error('failboat');
+    req.fail(function(xhr, textStatus, error) {
+      $('#eval-modal #eval-error').fadeIn(250).text("Could not create new Eval Source: " + error);
     })
   });
 
@@ -610,7 +636,7 @@ $(function() {
     });
 
     req.always(function() {
-      btn.removeAttr('disabled', 'disabled');
+      btn.removeAttr('disabled');
       btn.button('reset');
     });
   });
