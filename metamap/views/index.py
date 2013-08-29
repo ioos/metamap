@@ -299,3 +299,36 @@ def download_map_set(map_set_id, source_type_id):
     response.headers["Content-Disposition"] = "attachment;filename=%s_%s.json" % (map_set_id, source_type_id)
     return response
 
+@app.route("/map_set", methods=['POST'])
+def new_map_set():
+    map_set = json.loads(request.form['data'])
+
+    db_map_set = db.MapSet()
+
+    db_map_set.name = map_set['name']
+    db_map_set.save()
+
+    if map_set['copySrc']:
+        src_id = ObjectId(map_set['copySrc'])
+        db_map_set.parent = src_id
+
+        # copy all mappings
+        # @TODO: the parent property should make this irrelevent
+        mappings = db.Mapping.find({'map_set':src_id})
+        for mapping in mappings:
+            #mapping._id = None      # gen a new one
+            new_mapping = db.Mapping()
+            new_mapping.ioos_name = mapping.ioos_name
+            new_mapping.queries = mapping.queries
+            new_mapping.map_set = db_map_set._id
+
+            new_mapping.save()
+
+        db_map_set.save()
+
+    retval = {'_id':str(db_map_set._id)}
+    response = make_response(json.dumps(retval))
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+

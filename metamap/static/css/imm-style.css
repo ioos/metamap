@@ -98,3 +98,8 @@
 #eval .list-group .list-group-item:first-child {
   display: none;
 }
+
+#new-mapset-modal #new-mapset-error {
+  display: none;
+}
+

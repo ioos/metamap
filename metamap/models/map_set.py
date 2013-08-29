@@ -13,6 +13,7 @@ class MapSet(Document):
         'name'    : unicode,
         'owner'   : ObjectId,
         'authors' : [ObjectId],
+        'parent'  : ObjectId,   # ref to a "parent" MapSet if applicable
         'created' : datetime,
         'updated' : datetime,
     }
