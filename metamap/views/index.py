@@ -332,3 +332,29 @@ def new_map_set():
 
     return response
 
+@app.route("/import", methods=['POST'])
+def import_mapping():
+
+    map_set = db.MapSet()
+    map_set.name = request.form['name']
+    map_set.save()
+
+    source_type = ObjectId(request.form['source_type'])
+    file_obj = request.files['upload']
+
+    mapfile = json.load(file_obj)
+
+    for k, v in mapfile.iteritems():
+        mapping = db.Mapping()
+        mapping.ioos_name = k
+        mapping.map_set = map_set._id
+        mapping.queries = [{'source_type': source_type,
+                            'query': v}]
+        mapping.save()
+
+    retval = {'_id':str(map_set._id)}
+    response = make_response(json.dumps(retval))
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+

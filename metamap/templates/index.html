@@ -21,7 +21,10 @@
         {%- endfor %}
         <li class="divider"></li>
         <li>
-          <a href="#new-mapset-modal" data-toggle="modal">New MapSet...</a>
+          <a href="#import-modal" data-toggle="modal"><span class="glyphicon glyphicon-upload"></span> Import Mapping...</a>
+        </li>
+        <li>
+          <a href="#new-mapset-modal" data-toggle="modal"><span class="glyphicon glyphicon-plus"></span> New MapSet...</a>
         </li>
       </ul>
     </li>
@@ -40,8 +43,6 @@
         {%- endfor %}
       </ul>
   </ul>
-
-  <button type="button" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-upload"></span> Import Mapping</button>
 
   <ul class="nav navbar-nav navbar-right">
     <li><a href="#">Logout</a></li>
@@ -259,6 +260,64 @@
   </div>
 </div>
 
+<div id="import-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Import Mapping</h4>
+      </div>
+      <div class="modal-body">
+        <div id="import-error" class="alert alert-danger"></div>
+        <p>This will import a JSON Wicken mapping definition into a new MapSet. You must choose the Source Type to import the selectors into.</p>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="name" class="col-lg-4 control-label">Name</label>
+            <div class="col-lg-8">
+              <input name="name" class="form-control" value="" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="source_type" class="col-lg-4 control-label">Source Type</label>
+            <div class="col-lg-8">
+              <select name="source_type" class="form-control">
+                {%- for src in srcs %}
+                <option value="{{ src._id }}">{{ src.name }}</option>
+                {%- endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="upload" class="col-lg-4 control-label">File</label>
+            <div class="col-lg-8">
+              <input name="upload" type="file" class="form-control" value="" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-4 control-label">Owner</label>
+            <div class="col-lg-8">
+              <p class="form-control-static">You</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="name" class="col-lg-4 control-label">Authors</label>
+            <div class="col-lg-8">
+              {%- for x in range(0) %}
+              <label class="checkbox-inline">
+                <input type="checkbox" value="{{x}}" /> Sample Name
+              </label>
+              {%- endfor %}
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-loading-text="Importing..." id="import-btn">Import</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script type="text/javascript">
 
 function evalIoos(row) {
@@ -634,6 +693,41 @@ $(function() {
     req.fail(function(xhr, textStatus, error) {
       $('#new-mapset-modal #new-mapset-error').fadeIn(250).text("Could not create new MapSet: " + error);
     });
+
+    req.always(function() {
+      btn.removeAttr('disabled');
+      btn.button('reset');
+    });
+  });
+
+  $('#import-modal').on('show.bs.modal', function() {
+    $('#import-error', $(this)).hide();
+  });
+
+  $('#import-modal #import-btn').on('click', function() {
+    var btn = $(this);
+
+    btn.attr('disabled', 'disabled');
+    btn.button('loading');
+
+    var formData = new FormData($('#import-modal form')[0]);
+    var url = '{{ url_for("import_mapping") }}';
+    var req = $.ajax({
+      url: url,
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false
+    }, 'json');
+
+    req.done(function(data) {
+      $('#import-modal').modal('hide');
+
+      window.location.href = '/' + data._id;
+    })
+    req.fail(function(xhr, textStatus, error) {
+      $('#import-modal #import-error').fadeIn(250).text("Could not import mapping: " + error);
+    })
 
     req.always(function() {
       btn.removeAttr('disabled');
