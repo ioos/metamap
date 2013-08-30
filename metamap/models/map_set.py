@@ -33,6 +33,6 @@ class MapSet(Document):
         """
         Not to be confused with actual db param source_types, this actually returns the database objects.
         """
-        src_types = list((db.SourceType.find({'_id':src}) for src in self.source_types))
+        src_types = list((db.SourceType.find_one({'_id':src}) for src in self.source_types))
         return src_types
 

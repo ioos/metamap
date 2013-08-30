@@ -43,6 +43,10 @@
         {%- endfor %}
       </ul>
     </li>
+
+    <li>
+      <a href="#source-modal" class="btn btn-default navbar-btn" data-toggle="modal">Source Columns</a>
+    </li>
   </ul>
 
   <ul class="nav navbar-nav navbar-right">
@@ -67,7 +71,7 @@
     <tr>
       <th>Concept Name</th>
       {%- for src in srcs %}
-      <th>
+      <th data-stid="{{ src._id }}">
         <a href="#" class="pull-right"><span class="glyphicon glyphicon-resize-horizontal"></span></a>
         {{ src.name }}
       </th>
@@ -319,6 +323,44 @@
     </div>
   </div>
 </div>
+
+<div id="source-modal" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Source Type Columns</h4>
+      </div>
+      <div class="modal-body">
+        <div id="source-error" class="alert alert-danger"></div>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-lg-4 control-label">Source Types</label>
+            <div class="col-lg-8">
+              <ol>
+                {%- for src in all_srcs %}
+                <li>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" value="{{ src._id }}" />
+                      {{ src.name }}
+                    </label>
+                  </div>
+                </li>
+                {%- endfor %}
+              </ol>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-loading-text="Saving..." id="source-btn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="text/javascript">
 
 function evalIoos(row) {
@@ -735,6 +777,97 @@ $(function() {
       btn.button('reset');
     });
   });
+
+  $('#source-modal').on('show.bs.modal', function() {
+    $('#source-error', $(this)).hide();
+
+    $('#source-modal input[type="checkbox"]').prop('checked', false);
+
+    // match up current columns to values
+    $('th').filter(function() { return $(this).data('stid') != null; }).each(function(idx, el) {
+      var stid = $(el).data('stid');
+      $('#source-modal input[value="' + stid + '"]').prop('checked', true);
+    });
+  });
+
+  $('#source-modal input[type=checkbox]').on('change', function() {
+    var stid = $(this).val();
+    var checked = $(this).is(':checked');
+
+    if (checked) {
+      // adding a new col
+      var idx = $(this).parent().children().index(this) + 1;
+      var stid = $(this).val();
+
+      var newTh = $('<th></th>').data('stid', stid).text($(this).parent().text());
+      var newTd = $('<td></td>');
+      var textArea = $('<textarea></textarea>').attr("name", stid);
+      newTd.append(textArea)
+
+      $.getJSON('/mapping/{{ map_set._id }}/' + stid)
+      .done(function(data) {
+        console.log(data);
+
+        // @TODO improve?
+        var thIdx = newTh.parent().children().index(newTh) + 1;
+
+        for (var k in data) {
+          var tr = $('tr').filter(function() { return $(this).data('id') == k; });
+          $('td:nth-child(' + thIdx + ') textarea', tr).val(data[k]);
+        }
+      })
+      .fail(function(xhr, textStatus, error) {
+        $('#source-modal #source-error').fadeIn(250).text("Could not retrieve data for source: " + error);
+      });
+
+      //$('thead tr th:nth-child(' + idx + ')').before(newTh);
+      //$('tbody tr td:nth-child(' + idx + ')').before(newTd);
+
+      // @TODO: determine index to insert
+
+      newTh.appendTo($('thead tr'));
+      newTd.appendTo($('tbody tr'));
+
+    } else {
+      // removal of an existing col
+      var th = $('th').filter(function() {
+        return $(this).data('stid') == stid;
+      })
+      var idx = $('thead tr').children().index(th) + 1;
+
+      th.remove();
+      $('td:nth-child(' + idx + ')').remove();
+    }
+  });
+
+  $('#source-modal #source-btn').on('click', function() {
+    
+    var btn = $(this);
+
+    btn.attr('disabled', 'disabled');
+    btn.button('loading');
+
+    var data = [];
+
+    $('#source-modal input:checked').each(function (idx, el) {
+      data.push($(el).val());
+    });
+
+    var req = $.post('/mapset_sources/{{ map_set._id}}', {'data':JSON.stringify(data, null, '\t')})
+    req.done(function() {
+      $('#source-modal').modal('hide');
+    });
+
+    req.fail(function(xhr, textStatus, error) {
+      $('#source-modal #source-error').fadeIn(250).text("Could not save source type columns: " + error);
+    });
+
+    req.always(function() {
+      btn.removeAttr('disabled');
+      btn.button('reset');
+    });
+  });
+
 });
 </script>
 

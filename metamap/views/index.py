@@ -17,6 +17,7 @@ import requests
 from netCDF4 import Dataset
 from petulantbear.netcdf2ncml import dataset2ncml
 import tempfile
+from collections import defaultdict
 
 class LoginForm(Form):
     username = TextField(u'Name')
@@ -77,12 +78,21 @@ def index(map_set_id=None):
     # get all mappings
     mappings = map_set.mappings
 
+    print >>sys.stderr, mappings
+
     # set indicies to help the view out
     srcs = map_set.src_types
-
+    srcs_idx = [s._id for s in srcs]
+    src_map = {s._id:s for s in srcs}
+    
     # transform lists in correct order for table view
     for m in mappings:
-        m.queries = sorted((q for q in m.queries if q['source_type'] in srcs), key=lambda x: srcs.index(x))
+        ql = [''] * len(srcs)
+        for q in m.queries:
+            idx = srcs_idx.index(q['source_type'])
+            ql[idx] = q['query']
+
+        m.queries = ql
 
     all_srcs = list(db.SourceType.find().sort([('name', 1)]))
     src_map = {s._id:s for s in all_srcs}
@@ -363,4 +373,32 @@ def import_mapping():
     response.headers['Content-type'] = 'application/json'
 
     return response
+
+@app.route('/mapping/<ObjectId:map_set_id>/<ObjectId:source_type_id>', methods=['GET'])
+def get_mapping_data(map_set_id, source_type_id):
+    """
+    Returns JSON of current mappings for this MapSet and SourceType.
+
+    { "mapping id" -> "query", ... }
+    """
+    map_set = db.MapSet.find_one({'_id': map_set_id})
+    mappings = db.Mapping.find({'map_set': map_set_id,
+                                'queries.source_type': source_type_id})
+
+    retval = {str(m._id):[q['query'] for q in m.queries if q['source_type'] == source_type_id][0] for m in mappings}
+
+    response = make_response(json.dumps(retval))
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+
+@app.route('/mapset_sources/<ObjectId:map_set_id>', methods=['POST'])
+def update_mapset_sources(map_set_id):
+    source_types = json.loads(request.form['data'])
+
+    map_set = db.MapSet.find_one({'_id': map_set_id})
+    map_set.source_types = [ObjectId(x) for x in source_types]
+    map_set.save()
+
+    return ""
 
