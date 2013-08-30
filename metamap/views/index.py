@@ -56,7 +56,9 @@ def index(map_set_id=None):
             ms = db.MapSet()
             ms.name = u"Default"
             ms.save()
-        map_set_id = ms._id
+        map_set = ms
+    else:
+        map_set = db.MapSet.find_one({'_id':map_set_id})
 
 
     # list of map sets
@@ -73,28 +75,17 @@ def index(map_set_id=None):
 
 
     # get all mappings
-    mappings = list(db.Mapping.find({'map_set': map_set_id}).sort([('ioos_name',1)]))
+    mappings = map_set.mappings
 
     # set indicies to help the view out
-    srcs = list(db.SourceType.find().sort([('name', 1)]))
-    if len(srcs) < 1:
-        # Create the default SourceType as NcML
-        st = db.SourceType()
-        st.name = u"NcML"
-        st.save()
-        srcs = [st]
-
-    srcs_idx = [s._id for s in srcs]
-    src_map = {s._id:s for s in srcs}
+    srcs = map_set.src_types
 
     # transform lists in correct order for table view
     for m in mappings:
-        ql = [''] * len(srcs)
-        for q in m.queries:
-            idx = srcs_idx.index(q['source_type'])
-            ql[idx] = q['query']
+        m.queries = sorted((q for q in m.queries if q['source_type'] in srcs), key=lambda x: srcs.index(x))
 
-        m.queries = ql
+    all_srcs = list(db.SourceType.find().sort([('name', 1)]))
+    src_map = {s._id:s for s in all_srcs}
 
     f = AddEvalSourceForm()
     f.source_type.choices = [(s._id, s.name) for s in srcs]
@@ -109,11 +100,12 @@ def index(map_set_id=None):
     eval_sources.insert(0, db.EvalSource())
 
     return render_template('index.html',
-                           map_set_id=map_set_id,
+                           map_set=map_set,
                            map_sets=map_sets,
                            map_set_lookup=map_set_lookup,
                            mappings=mappings,
                            srcs=srcs,
+                           all_srcs=all_srcs,
                            form=f,
                            eval_sources=eval_sources)
 
