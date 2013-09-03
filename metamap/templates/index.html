@@ -361,7 +361,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal" id="source-cancel-btn">Cancel</button>
         <button type="button" class="btn btn-primary" data-loading-text="Saving..." id="source-btn">Save</button>
       </div>
     </div>
@@ -852,14 +852,19 @@ $(function() {
   $('#source-modal').on('show.bs.modal', function() {
     $('#source-error', $(this)).hide();
 
-
     $('#source-modal input[type="checkbox"]').prop('checked', false);
+
+    var curSel = [];
 
     // match up current columns to values
     $('th').filter(function() { return $(this).data('stid') != null; }).each(function(idx, el) {
       var stid = $(el).data('stid');
       $('#source-modal input[value="' + stid + '"]').prop('checked', true);
+      curSel.push(stid);
     });
+
+    // save current selections
+    $(this).data('cur-sel', curSel);
 
     // clear out new source type
     $('#source-modal input[name="new-source-type"]').val('');
@@ -946,6 +951,25 @@ $(function() {
   $('#source-modal #new-source-type-btn').on('click', function() {
     addNewSourceType();
     event.preventDefault();
+  });
+
+  $('#source-modal #source-cancel-btn').on('click', function() {
+    // reset all checkboxes to original state
+    var origSel = $('#source-modal').data('cur-sel');
+
+    // check any that need to be checked
+    var cbs = $('#source-modal input[type="checkbox"]').not(':checked').filter(function() {
+      return $.inArray($(this).val(), origSel) != -1;
+    });
+
+    cbs.prop('checked', true).change();
+
+    // uncheck those that need to be unchecked
+    var others = $('#source-modal input[type="checkbox"]:checked').filter(function() {
+      return $.inArray($(this).val(), origSel) == -1;
+    });
+    
+    others.prop('checked', false).change();
   });
 
 });
