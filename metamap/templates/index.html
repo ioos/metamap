@@ -69,6 +69,7 @@
   <thead>
     <tr>
       <th>Concept Name</th>
+      <th>Description</th>
       {%- for src in srcs %}
       <th data-stid="{{ src._id }}">
         <a href="#" class="pull-right"><span class="glyphicon glyphicon-resize-horizontal"></span></a>
@@ -93,6 +94,10 @@
         </div>
       </td>
 
+      <td class="bigger" style="width: 300px;">
+        <textarea name="description">{{ mapping.description }}</textarea>
+      </td>
+
       {%- for x in range(srcs|count) %}
       <td><textarea name="{{ srcs[x]._id }}">{{ mapping.queries[x] }}</textarea></td>
       {%- endfor %}
@@ -109,6 +114,10 @@
           <button class="btn btn-default btn-xs eval-btn">Evaluate</button>
           <button class="btn btn-danger btn-xs delete-btn">Delete</button>
         </div>
+      </td>
+
+      <td>
+        <textarea name="description"></textarea>
       </td>
 
       {%- for src in srcs %}
@@ -423,19 +432,20 @@ function save(row) {
   // build object to send
   var mapping = {
     ioos_name: $('input', row).val(),
+    description: $('textarea:first', row).val(),
     queries: [],
     map_set: "{{ map_set._id }}",
     _id: row.data('id'),
   };
 
-  $('textarea', row).each(function(idx, el) {
+  $('textarea', row).not('textarea:first', row).each(function(idx, el) {
     if ($(el).val()) {
       mapping.queries.push({source_type: $(el).attr('name'),
                             query: $(el).val()});
     }
   });
 
-  //console.log(mapping);
+  // console.log(mapping);
 
   var wat = $.ajax({
     type: 'POST',
@@ -831,14 +841,14 @@ $(function() {
     if (dragged.is(':checked')) {
       // find the th that has the same source type id, remove it, put it in the new position
       var th = $('th').filter(function() { return $(this).data('stid') == curStid; });
-      var curIdx = th.parent().children().index(th[0]) + 1;
+      var curIdx = th.parent().children().index(th[0]) + 1 + 1; /* nth-child is 1-based, +1 for description */
       var td = $('td:nth-child(' + curIdx + ')');
 
       // remove
       th.detach();
       td.detach();
 
-      var newIdx = $(':checked', ui.item.parents('ol')).index(dragged[0]) + 1;
+      var newIdx = $(':checked', ui.item.parents('ol')).index(dragged[0]) + 1 + 1; /* nth-child is 1-based, +1 for description */
 
       // reattach
       $('thead tr th:nth-child(' + newIdx + ')').after(th);
@@ -875,7 +885,7 @@ $(function() {
 
     if (checked) {
       // adding a new col
-      var idx = $(':checked', $(this).parents('ol')).index(this) + 1;
+      var idx = $(':checked', $(this).parents('ol')).index(this) + 1 + 1; /* nth-child is 1-based, +1 for description */
       var stid = $(this).val();
 
       var newTh = $('<th></th>').data('stid', stid).text($(this).parent().text());
@@ -887,7 +897,7 @@ $(function() {
       $.getJSON('/mapping/{{ map_set._id }}/' + stid)
       .done(function(data) {
         // @TODO improve?
-        var thIdx = newTh.parent().children().index(newTh) + 1;
+        var thIdx = newTh.parent().children().index(newTh) + 1; /* nth-child is 1-based, description accounted for via index */
 
         for (var k in data) {
           var tr = $('tr').filter(function() { return $(this).data('id') == k; });
@@ -909,7 +919,7 @@ $(function() {
       var th = $('th').filter(function() {
         return $(this).data('stid') == stid;
       })
-      var idx = $('thead tr').children().index(th) + 1;
+      var idx = $('thead tr').children().index(th) + 1; /* nth-child is 1-based, description accounted for via index */
 
       th.remove();
       $('td:nth-child(' + idx + ')').remove();

@@ -10,12 +10,13 @@ class Mapping(Document):
     use_schemaless = True
 
     structure = {
-        'ioos_name' : unicode, # ioos concept name
-        'queries'   : [{'source_type' :ObjectId,
-                        'query'       :unicode}],
-        'map_set'   : ObjectId,
-        'created'   : datetime,
-        'updated'   : datetime,
+        'ioos_name'   : unicode, # ioos concept name
+        'description' : unicode,
+        'queries'     : [{'source_type' :ObjectId,
+                          'query'       :unicode}],
+        'map_set'     : ObjectId,
+        'created'     : datetime,
+        'updated'     : datetime,
     }
 
     default_values = {

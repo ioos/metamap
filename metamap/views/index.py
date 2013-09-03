@@ -167,6 +167,7 @@ def update_mapping():
         db_mapping = db.Mapping()
 
     db_mapping.ioos_name = mapping['ioos_name']
+    db_mapping.description = mapping['description']
     db_mapping.map_set = ObjectId(mapping['map_set'])
     db_mapping.queries = [{'source_type':ObjectId(x['source_type']),
                            'query': x['query']} for x in mapping['queries']]
