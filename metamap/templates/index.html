@@ -575,12 +575,12 @@ $(function() {
 
   $('#mapping-table .new-row input, #mapping-table .new-row textarea').on("change", newRow);
 
-  $('#mapping-table th a').on('click', function() {
+  $('#mapping-table').on('click', 'th a', function() {
     toggleColumn($(this).parents('th'));
     event.preventDefault();
   });
 
-  var ta = $('#mapping-table textarea').on("focus", function() {
+  var ta = $('#mapping-table').on("focus", "textarea", function() {
     var td = $(this).parents('td');
     if (!td.hasClass('bigger')) {
       toggleColumn(td);
@@ -879,6 +879,7 @@ $(function() {
       var stid = $(this).val();
 
       var newTh = $('<th></th>').data('stid', stid).text($(this).parent().text());
+      newTh.prepend($('<a href="#" class="pull-right"><span class="glyphicon glyphicon-resize-horizontal"></span></a>'));
       var newTd = $('<td></td>');
       var textArea = $('<textarea></textarea>').attr("name", stid);
       newTd.append(textArea)
