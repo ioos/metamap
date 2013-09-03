@@ -78,19 +78,18 @@ def index(map_set_id=None):
     # get all mappings
     mappings = map_set.mappings
 
-    print >>sys.stderr, mappings
-
     # set indicies to help the view out
     srcs = map_set.src_types
     srcs_idx = [s._id for s in srcs]
     src_map = {s._id:s for s in srcs}
-    
+
     # transform lists in correct order for table view
     for m in mappings:
         ql = [''] * len(srcs)
         for q in m.queries:
-            idx = srcs_idx.index(q['source_type'])
-            ql[idx] = q['query']
+            if q['source_type'] in srcs_idx:
+                idx = srcs_idx.index(q['source_type'])
+                ql[idx] = q['query']
 
         m.queries = ql
 
