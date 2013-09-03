@@ -350,6 +350,9 @@
                 {%- endfor %}
               </ol>
             </div>
+            <div class="col-lg-8 col-lg-offset-4">
+              <p class="form-control-static">You may re-order these columns by drag and drop.</p>
+            </div>
           </div>
         </form>
       </div>
@@ -778,6 +781,33 @@ $(function() {
     });
   });
 
+  $("#source-modal ol").sortable();
+  $("#source-modal ol").disableSelection();
+
+  $('#source-modal ol').on('sortupdate', function(ev, ui) {
+    var dragged = $('input[type="checkbox"]', ui.item);
+    var curStid = dragged.val();
+
+    if (dragged.is(':checked')) {
+      // find the th that has the same source type id, remove it, put it in the new position
+      var th = $('th').filter(function() { return $(this).data('stid') == curStid; });
+      var curIdx = th.parent().children().index(th[0]) + 1;
+      var td = $('td:nth-child(' + curIdx + ')');
+
+      // remove
+      th.detach();
+      td.detach();
+
+      var newIdx = $(':checked', ui.item.parents('ol')).index(dragged[0]) + 1;
+
+      // reattach
+      $('thead tr th:nth-child(' + newIdx + ')').after(th);
+      $('tbody tr td:nth-child(' + newIdx + ')').each(function(idx, el) {
+        $(this).after(td[idx]);
+      });
+    }
+  });
+
   $('#source-modal').on('show.bs.modal', function() {
     $('#source-error', $(this)).hide();
 
@@ -796,7 +826,7 @@ $(function() {
 
     if (checked) {
       // adding a new col
-      var idx = $(this).parent().children().index(this) + 1;
+      var idx = $(':checked', $(this).parents('ol')).index(this) + 1;
       var stid = $(this).val();
 
       var newTh = $('<th></th>').data('stid', stid).text($(this).parent().text());
@@ -806,8 +836,6 @@ $(function() {
 
       $.getJSON('/mapping/{{ map_set._id }}/' + stid)
       .done(function(data) {
-        console.log(data);
-
         // @TODO improve?
         var thIdx = newTh.parent().children().index(newTh) + 1;
 
@@ -820,13 +848,8 @@ $(function() {
         $('#source-modal #source-error').fadeIn(250).text("Could not retrieve data for source: " + error);
       });
 
-      //$('thead tr th:nth-child(' + idx + ')').before(newTh);
-      //$('tbody tr td:nth-child(' + idx + ')').before(newTd);
-
-      // @TODO: determine index to insert
-
-      newTh.appendTo($('thead tr'));
-      newTd.appendTo($('tbody tr'));
+      $('thead tr th:nth-child(' + idx + ')').after(newTh);
+      $('tbody tr td:nth-child(' + idx + ')').after(newTd);
 
     } else {
       // removal of an existing col
