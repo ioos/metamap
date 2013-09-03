@@ -303,13 +303,8 @@ def eval_mapping(mapping_id):
 @app.route("/download/<ObjectId:map_set_id>/<ObjectId:source_type_id>", methods=['GET'])
 def download_map_set(map_set_id, source_type_id):
 
-    map_file = {}
-
-    mappings = db.Mapping.find({'map_set':map_set_id,
-                                'queries.source_type': source_type_id})
-
-    for m in mappings:
-        map_file[m.ioos_name] = [q['query'] for q in m.queries if q['source_type'] == source_type_id][0]
+    map_set = db.MapSet.find_one({'_id':map_set_id})
+    map_file = map_set.make_source_mapping(source_type_id)
 
     response = make_response(json.dumps(map_file, indent=2))
     response.headers["Content-type"] = "application/json"

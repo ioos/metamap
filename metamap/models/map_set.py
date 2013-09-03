@@ -36,3 +36,23 @@ class MapSet(Document):
         src_types = list((db.SourceType.find_one({'_id':src}) for src in self.source_types))
         return src_types
 
+    def make_source_mapping(self, source_type_id):
+        """
+        Creates a source mapping to be used by wicken.
+        """
+
+        source_type = db.SourceType.find_one({'_id':source_type_id})
+
+        map_file = {'__name__' : self.name,
+                    '__source_mapping_type__' : source_type.name}
+
+        mappings = db.Mapping.find({'map_set':self._id,
+                                    'queries.source_type': source_type_id})
+
+        for m in mappings:
+            map_file[m.ioos_name] = {'query': [q['query'] for q in m.queries if q['source_type'] == source_type_id][0]}
+            if m.description:
+                map_file[m.ioos_name]['desc'] = m.description
+
+        return map_file
+
