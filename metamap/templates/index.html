@@ -351,6 +351,10 @@
               </ol>
             </div>
             <div class="col-lg-8 col-lg-offset-4">
+              <input type="text" class="form-control" name="new-source-type" placeholder="New Source Type" />
+              <button class="btn btn-sm btn-default" id="new-source-type-btn" data-loading-text="Adding..."><span class="glyphicon glyphicon-plus"></span> Add</button>
+            </div>
+            <div class="col-lg-8 col-lg-offset-4">
               <p class="form-control-static">You may re-order these columns by drag and drop.</p>
             </div>
           </div>
@@ -525,6 +529,43 @@ function postEvalSource(eid) {
     contentType: false,
     processData: false
   }, 'json');
+
+  return req;
+}
+
+function addNewSourceType() {
+  var inp = $('#source-modal input[name="new-source-type"]');
+  var btn = $('#source-modal #new-source-type-btn');
+
+  inp.attr('disabled', 'disabled');
+  btn.attr('disabled', 'disabled');
+  btn.button('loading');
+
+  var req = $.post('/source_type', {name:inp.val()});
+
+  req.done(function(data) {
+    // add to the list!
+    var newItem = $('<li><div class="checkbox"><label><input type="checkbox" value="' + data._id + '" />' + data.name + '</label></div></li>');
+    $('#source-modal ol').append(newItem);
+
+    // check it programatically
+    $('input[type="checkbox"]', newItem)
+      .prop('checked', true)
+      .change();
+
+    // clear out text box
+    inp.val('');
+  });
+
+  req.fail(function(xhr, textStatus, error) {
+    $('#source-modal #source-error').fadeIn(250).text("Could not add new source type: " + error);
+  });
+
+  req.always(function() {
+    inp.removeAttr('disabled');
+    btn.removeAttr('disabled');
+    btn.button('reset');
+  });
 
   return req;
 }
@@ -811,6 +852,7 @@ $(function() {
   $('#source-modal').on('show.bs.modal', function() {
     $('#source-error', $(this)).hide();
 
+
     $('#source-modal input[type="checkbox"]').prop('checked', false);
 
     // match up current columns to values
@@ -818,9 +860,12 @@ $(function() {
       var stid = $(el).data('stid');
       $('#source-modal input[value="' + stid + '"]').prop('checked', true);
     });
+
+    // clear out new source type
+    $('#source-modal input[name="new-source-type"]').val('');
   });
 
-  $('#source-modal input[type=checkbox]').on('change', function() {
+  $('#source-modal').on('change', 'input[type=checkbox]', function() {
     var stid = $(this).val();
     var checked = $(this).is(':checked');
 
@@ -889,6 +934,18 @@ $(function() {
       btn.removeAttr('disabled');
       btn.button('reset');
     });
+  });
+
+  $('#source-modal input[name="new-source-type"]').on('keypress', function(ev) {
+    if (ev.which == 13) {
+      addNewSourceType();
+      event.preventDefault();
+    }
+  });
+
+  $('#source-modal #new-source-type-btn').on('click', function() {
+    addNewSourceType();
+    event.preventDefault();
   });
 
 });

@@ -402,3 +402,19 @@ def update_mapset_sources(map_set_id):
 
     return ""
 
+@app.route('/source_type', methods=['POST'])
+def add_source_type():
+    name = request.form['name']
+
+    source_type = db.SourceType()
+    source_type.name = name
+    source_type.save()
+
+    retval = {'_id': str(source_type._id),
+              'name': name}
+
+    response = make_response(json.dumps(retval))
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+

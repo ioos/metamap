@@ -103,3 +103,9 @@
   display: none;
 }
 
+#source-modal input[name='new-source-type'] {
+  display: inline-block;
+  width: 50%;
+  margin-left: 40px;
+}
+
