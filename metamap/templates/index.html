@@ -901,6 +901,9 @@ $(function() {
       $('thead tr th:nth-child(' + idx + ')').after(newTh);
       $('tbody tr td:nth-child(' + idx + ')').after(newTd);
 
+      // add placeholder text to last row
+      textArea.last().attr('placeholder', $.trim($(this).parent().text()));
+
     } else {
       // removal of an existing col
       var th = $('th').filter(function() {
