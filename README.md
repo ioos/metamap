@@ -3,6 +3,8 @@ IOOS Metamap
 
 Metamap is a web frontend to generate source mapping files to be used by [asascience-open/wicken](https://github.com/asascience-open/wicken).  It presents a spreadsheet-like interface that maps a **concept name** to XPath operators to extract data from formats like ISO 19115, NetCDF CF NCML etc.
 
+![Metamap screenshot](http://f.cl.ly/items/3e3V3I2c1W433n3o2x0f/Screen%20shot%202013-09-04%20at%2010.26.07%20AM.png)
+
 ### Installing
 
 metamap runs on Python 2.7.x and uses MongoDB.
@@ -54,11 +56,15 @@ metamap provides a spreadsheet-like interface for creating **mappings** between 
 
 On first run a Default MapSet is created.  You'll need to add Source Types to the application in order to start creating mappings. Press the Source Columns button and enter some new Source Types such as ISO 19115, then press the Save button to update the MapSet to know about these Source Types. 
 
+![Adding Source Types](http://f.cl.ly/items/1g3b2z2T0s1X3l1m0c36/Screen%20shot%202013-09-04%20at%2010.35.46%20AM.png)
+
 #### Adding Mappings
 
 The bottom row of the spreadsheet is for adding new mappings.  Simply begin typing in the Concept Name input box and press tab or use your mouse to change focus to another field and a new mapping will be added.
 
 You can enter an optional description, then an XPath query for each of the Source Types you have added.  The XPath text boxes will auto expand as you focus them.  You do not need to fill out every text box, only the ones that apply.
+
+![Editing Mappings](http://f.cl.ly/items/1Y0U453o093f1a0A3911/Screen%20shot%202013-09-04%20at%2010.39.14%20AM.png)
 
 Mappings automatically save after you've edited them.  If you've added any Eval Sources, they will be updated right after a save.
 
@@ -87,6 +93,8 @@ Using the Source Columns button pops up a dialog where you can activate/deactiva
 #### Eval Sources
 
 An Eval Source lets you upload a file or give a URL to an XML file associated with a Source Type.  When you enter XPath queries, these Eval Sources are queried and the results displayed along the bottom row.  You can use this to spot-check your XPath queries for correctness.
+
+![Eval source](http://f.cl.ly/items/2R2e123D3d0I0N2H1d3e/Screen%20shot%202013-09-04%20at%2010.41.27%20AM.png)
 
 ##### Adding
 
