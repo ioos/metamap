@@ -56,3 +56,38 @@ class MapSet(Document):
 
         return map_file
 
+    def import_mapping(self, mapfile):
+        """
+        Imports a source mapping that was exported by make_source_mapping.
+        """
+
+        source_type_name = mapfile['__source_mapping_type__']
+        source_type = db.SourceType.find_one({'name':source_type_name})
+        if not source_type:
+            source_type = db.SourceType()
+            source_type.name = source_type_name
+            source_type.save()
+
+        if source_type._id not in self.source_types:
+            self.source_types.append(source_type._id)
+            self.save()
+
+        ret_ids = []
+
+        for k, v in mapfile.iteritems():
+            if k.startswith("__"):
+                continue
+
+            mapping = db.Mapping()
+            mapping.ioos_name = k
+            mapping.map_set = self._id
+            if "desc" in v:
+                mapping.description = v['desc']
+            mapping.queries = [{'source_type': source_type._id,
+                                'query': v['query']}]
+            mapping.save()
+
+            ret_ids.append(mapping._id)
+
+        return ret_ids
+

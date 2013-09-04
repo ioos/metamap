@@ -354,18 +354,10 @@ def import_mapping():
     map_set.name = request.form['name']
     map_set.save()
 
-    source_type = ObjectId(request.form['source_type'])
     file_obj = request.files['upload']
-
     mapfile = json.load(file_obj)
 
-    for k, v in mapfile.iteritems():
-        mapping = db.Mapping()
-        mapping.ioos_name = k
-        mapping.map_set = map_set._id
-        mapping.queries = [{'source_type': source_type,
-                            'query': v}]
-        mapping.save()
+    map_set.import_mapping(mapfile)
 
     retval = {'_id':str(map_set._id)}
     response = make_response(json.dumps(retval))

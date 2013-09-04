@@ -282,22 +282,12 @@
       </div>
       <div class="modal-body">
         <div id="import-error" class="alert alert-danger"></div>
-        <p>This will import a JSON Wicken mapping definition into a new MapSet. You must choose the Source Type to import the selectors into.</p>
+        <p>This will import a JSON Wicken mapping definition into a new MapSet.</p>
         <form class="form-horizontal">
           <div class="form-group">
             <label for="name" class="col-lg-4 control-label">Name</label>
             <div class="col-lg-8">
               <input name="name" class="form-control" value="" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="source_type" class="col-lg-4 control-label">Source Type</label>
-            <div class="col-lg-8">
-              <select name="source_type" class="form-control">
-                {%- for src in srcs %}
-                <option value="{{ src._id }}">{{ src.name }}</option>
-                {%- endfor %}
-              </select>
             </div>
           </div>
           <div class="form-group">
