@@ -96,6 +96,10 @@ def index(map_set_id=None):
     all_srcs = list(db.SourceType.find().sort([('name', 1)]))
     src_map = {s._id:s for s in all_srcs}
 
+    # reduce all srcs to remove srcs, then put srcs on front. this is for ordering
+    # in the source type modal
+    all_srcs = srcs + [s for s in all_srcs if s not in srcs]
+
     f = AddEvalSourceForm()
     f.source_type.choices = [(s._id, s.name) for s in srcs]
 

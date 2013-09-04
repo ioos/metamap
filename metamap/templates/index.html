@@ -33,7 +33,7 @@
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <span class="glyphicon glyphicon-download"></span> Download Source Mapping <b class="caret"></b>
       </a>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu" id="download-source-mapping-list">
         {%- for src in srcs %}
         <li>
           <a href="{{ url_for('download_map_set', map_set_id=map_set._id, source_type_id=src._id)}}">
@@ -914,6 +914,21 @@ $(function() {
       // add placeholder text to last row
       textArea.last().attr('placeholder', $.trim($(this).parent().text()));
 
+      // Update others:
+      // - download source mapping list
+
+      var ol = $('#download-source-mapping-list');
+      var li = $('<li><a href="/download/{{ map_set._id }}/' + stid + '"><span class="glyphicon glyphicon-download-alt"></span> ' + $.trim($(this).parent().text()) + '</a></li>');
+
+      var liidx = idx - 2;
+      $('li:nth-child(' + liidx + ')', ol).after(li);
+
+      // - eval source modal
+      var sel = $('select[id="source_type"]');
+      var option = $('<option value="' + stid + '">' + $.trim($(this).parent().text()) + '</option>');
+
+      $('option:nth-child(' + liidx + ')', sel).after(option);
+
     } else {
       // removal of an existing col
       var th = $('th').filter(function() {
@@ -923,11 +938,18 @@ $(function() {
 
       th.remove();
       $('td:nth-child(' + idx + ')').remove();
+
+      // remove source download
+      var liidx = idx - 2;
+      $('#download-source-mapping-list li:nth-child(' + liidx + ')').remove();
+
+      // remove eval source option
+      $('select[id="source_type"] option:nth-child(' + liidx + ')').remove();
     }
   });
 
   $('#source-modal #source-btn').on('click', function() {
-    
+
     var btn = $(this);
 
     btn.attr('disabled', 'disabled');
