@@ -1,7 +1,7 @@
 IOOS Metamap
 ============
 
-Metamap is a web frontend to generate source mapping files to be used by asascience-open/wicken.  It presents a spreadsheet-like interface that maps a **concept name** to XPath operators to extract data from formats like ISO 19115, NetCDF CF NCML etc.
+Metamap is a web frontend to generate source mapping files to be used by [asascience-open/wicken](https://github.com/asascience-open/wicken).  It presents a spreadsheet-like interface that maps a **concept name** to XPath operators to extract data from formats like ISO 19115, NetCDF CF NCML etc.
 
 ### Installing
 
@@ -106,7 +106,7 @@ When hovering over an Eval Source, you can press the Info icon to bring up an ed
 
 A source mapping is a downloadable file that contains concept names, descriptions, and XPath queries for a single Source Type.
 
-A dropdown on the navbar lets you pick from the known Source Types for this MapSet and has your browser download a JSON file that can be used with asascience-open/wicken.
+A dropdown on the navbar lets you pick from the known Source Types for this MapSet and has your browser download a JSON file that can be used with [asascience-open/wicken](https://github.com/asascience-open/wicken).
 
 ### Roadmap
 
