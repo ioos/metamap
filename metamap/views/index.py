@@ -30,19 +30,25 @@ class AddEvalSourceForm(Form):
     upload      = FileField(u'File')
 
 namespaces = {
-    "gmx":"http://www.isotc211.org/2005/gmx",
-    "gsr":"http://www.isotc211.org/2005/gsr",
-    "gss":"http://www.isotc211.org/2005/gss",
-    "gts":"http://www.isotc211.org/2005/gts",
-    "xs":"http://www.w3.org/2001/XMLSchema",
-    "gml":"http://www.opengis.net/gml/3.2",
-    "xlink":"http://www.w3.org/1999/xlink",
-    "xsi":"http://www.w3.org/2001/XMLSchema-instance",
-    "gco":"http://www.isotc211.org/2005/gco",
-    "gmd":"http://www.isotc211.org/2005/gmd",
-    "gmi":"http://www.isotc211.org/2005/gmi",
-    "srv":"http://www.isotc211.org/2005/srv",
-    "ncml":"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2",
+    "gmx"      : "http://www.isotc211.org/2005/gmx",
+    "gsr"      : "http://www.isotc211.org/2005/gsr",
+    "gss"      : "http://www.isotc211.org/2005/gss",
+    "gts"      : "http://www.isotc211.org/2005/gts",
+    "xs"       : "http://www.w3.org/2001/XMLSchema",
+    "gml"      : "http://www.opengis.net/gml/3.2",
+    "xlink"    : "http://www.w3.org/1999/xlink",
+    "xsi"      : "http://www.w3.org/2001/XMLSchema-instance",
+    "gco"      : "http://www.isotc211.org/2005/gco",
+    "gmd"      : "http://www.isotc211.org/2005/gmd",
+    "gmi"      : "http://www.isotc211.org/2005/gmi",
+    "srv"      : "http://www.isotc211.org/2005/srv",
+    "ncml"     : "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2",
+    "sos"      : "http://www.opengis.net/sos/1.0",
+    "ows"      : "http://www.opengis.net/ows/1.1",
+    "om"       : "http://www.opengis.net/om/1.0",
+    "sml"      : "http://www.opengis.net/sensorML/1.0.1",
+    "swe"      : "http://www.opengis.net/swe/1.0.1",
+    "swe2"     : "http://www.opengis.net/swe/2.0",
 }
 
 @app.route('/', methods=['GET'])
