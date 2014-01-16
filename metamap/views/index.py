@@ -35,7 +35,7 @@ namespaces = {
     "gss"      : "http://www.isotc211.org/2005/gss",
     "gts"      : "http://www.isotc211.org/2005/gts",
     "xs"       : "http://www.w3.org/2001/XMLSchema",
-    "gml"      : "http://www.opengis.net/gml/3.2",
+    "gml"      : "http://www.opengis.net/gml",
     "xlink"    : "http://www.w3.org/1999/xlink",
     "xsi"      : "http://www.w3.org/2001/XMLSchema-instance",
     "gco"      : "http://www.isotc211.org/2005/gco",
