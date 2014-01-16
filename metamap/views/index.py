@@ -310,7 +310,13 @@ def eval_mapping(mapping_id):
             # get new name (@TODO this should be easier)
             new_name = data_object._fixup_belief(mapping.ioos_name)[0]
 
-            evals.append((str(eval_source._id), getattr(data_object, new_name)))
+            val = None
+            try:
+                val = getattr(data_object, new_name)
+            except Exception as e:
+                print >>sys.stderr, "problem", e
+
+            evals.append((str(eval_source._id), val))
 
     return json.dumps(dict(evals))
 
