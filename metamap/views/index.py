@@ -43,6 +43,7 @@ namespaces = {
     "gmi"      : "http://www.isotc211.org/2005/gmi",
     "srv"      : "http://www.isotc211.org/2005/srv",
     "ncml"     : "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2",
+    "nc"       : "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2",
     "sos"      : "http://www.opengis.net/sos/1.0",
     "ows"      : "http://www.opengis.net/ows/1.1",
     "om"       : "http://www.opengis.net/om/1.0",
