@@ -291,7 +291,7 @@ def eval_mapping(mapping_id):
         source_type_id = query['source_type']
         eval_sources = db.EvalSource.find({'source_type':source_type_id})
 
-        cur_mappings = {'curval': query['query']}
+        cur_mappings = {mapping.ioos_name: query['query']}
 
         # load attachment from gridfs
         for eval_source in eval_sources:
@@ -305,7 +305,11 @@ def eval_mapping(mapping_id):
                                            root,
                                            namespaces=namespaces)
 
-            evals.append((str(eval_source._id), data_object.curval))
+
+            # get new name (@TODO this should be easier)
+            new_name = data_object._fixup_belief(mapping.ioos_name)[0]
+
+            evals.append((str(eval_source._id), getattr(data_object, new_name)))
 
     return json.dumps(dict(evals))
 

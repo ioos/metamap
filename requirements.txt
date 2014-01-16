@@ -4,6 +4,6 @@ gunicorn==0.16.1
 Flask-WTF==0.8.2
 Flask-MongoKit==0.6
 requests==1.2.3
--e git+git://github.com/asascience-open/wicken.git@8537ac35676e0451658d618ef26acf7c1add2b28
+-e git+git://github.com/asascience-open/wicken.git@a1b48451c1ab30d9b14cc45ec29145db382703af#egg=Wicken
 netCDF4==1.0.5
 
