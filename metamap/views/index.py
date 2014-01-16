@@ -12,7 +12,7 @@ import json
 from bson import ObjectId
 from StringIO import StringIO
 from lxml import etree
-from wicken.xml_dogma import XmlDogma
+from wicken.xml_dogma import MultipleXmlDogma
 import requests
 from netCDF4 import Dataset
 from petulantbear.netcdf2ncml import dataset2ncml
@@ -300,10 +300,10 @@ def eval_mapping(mapping_id):
             except:
                 print >>sys.stderr, "Could not parse:", eval_source.fs.src_file
 
-            data_object = XmlDogma(str(source_type_id),    # any identifier here
-                                   cur_mappings,
-                                   root,
-                                   namespaces=namespaces)
+            data_object = MultipleXmlDogma(str(source_type_id),    # any identifier here
+                                           cur_mappings,
+                                           root,
+                                           namespaces=namespaces)
 
             evals.append((str(eval_source._id), data_object.curval))
 
